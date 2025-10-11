@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
+import 'package:store_app/view/widgets/custom_search_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -75,6 +76,9 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
+
+            // search bar
+            const CustomSearchBar(),
           ],
         ),
       ),
