@@ -1,17 +1,28 @@
-# store_app
+# 🛍️ Store App
 
-A new Flutter project.
+Đây là **đồ án môn học: Lập trình trên thiết bị di động**, được xây dựng bằng **Flutter**.
 
-## Getting Started
+## 🧩 Giới thiệu
 
-This project is a starting point for a Flutter application.
+Ứng dụng **Store App** là một ứng dụng mua sắm trực tuyến mẫu, giúp người dùng:
+- Xem danh sách sản phẩm
+- Xem chi tiết từng sản phẩm
+- Thêm sản phẩm vào giỏ hàng
+- (Tùy chọn) Thanh toán hoặc quản lý tài khoản người dùng
 
-A few resources to get you started if this is your first Flutter project:
+Mục tiêu của dự án là **nắm vững quy trình phát triển ứng dụng Flutter đa nền tảng** (Android, iOS, Web, Desktop).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## ⚙️ Công nghệ sử dụng
+- **Flutter** (Dart)
+- **Provider / GetX / Bloc** (tuỳ theo kiến trúc bạn chọn)
+- **Firebase / REST API** (nếu có kết nối backend)
+- **Material Design** cho giao diện
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# store_app
+## 🚀 Cách chạy dự án
+
+1. Cài đặt Flutter (nếu chưa có):  
+   👉 [Hướng dẫn cài đặt Flutter](https://docs.flutter.dev/get-started/install)
+
+2. Clone dự án:
+   ```bash
+   git clone https://github.com/mingthanh/store_app.git
