@@ -18,19 +18,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final List<OnboardingItem> _item = [
     OnboardingItem(
       image: 'assets/images/intro.png',
-      title: 'discover latest fashion',
-      description: 'explore the newest fashion trends',
+      title: 'Step into style',
+      description: 'Sneakers that match your vibe and lifestyle',
     ),
     OnboardingItem(
       image: 'assets/images/intro1.png',
-      title: 'quality products',
-      description: 'shop premium brands at best prices',
+      title: 'Real kicks, real quality',
+      description: 'Authentic shoes from top brands, all in one place',
     ),
     OnboardingItem(
       image: 'assets/images/intro2.png',
-      title: 'easy shopping',
-      description:
-          'simple and secure shopping experience at your fingertips',
+      title: 'Shop your way',
+      description: 'Fast, secure, and hassle-free shoe shopping',
     ),
   ];
 
