@@ -15,22 +15,45 @@ class CustomSearchBar extends StatelessWidget {
           AppTextStyles.buttonMedium,
           Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
         ),
+
         decoration: InputDecoration(
           hintText: 'Search',
           hintStyle: AppTextStyles.withColor(
             AppTextStyles.buttonMedium,
             isDark ? Colors.grey[400]! : Colors.grey[600]!,
           ),
+
           prefixIcon: Icon(
             Icons.search,
             color: isDark ? Colors.grey[400]! : Colors.grey[600]!,
           ),
+
+          suffixIcon: Icon(
+            Icons.tune,
+            color: isDark ? Colors.grey[400]! : Colors.grey[600]!,
+          ),
+
           filled: true,
-          fillColor: isDark ? Colors.grey[850] : Colors.grey[200],
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: isDark ? Colors.grey[400]! : Colors.grey[600]!,
+              width: 1,
+            ),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Theme.of(context).primaryColor,
+              width: 1,
+            ),
           ),
         ),
       ),
