@@ -46,7 +46,9 @@ class _ProductCardState extends State<ProductCard> {
         boxShadow: [
           BoxShadow(
             color: isDark
+                // ignore: deprecated_member_use
                 ? Colors.black.withOpacity(0.3)
+                // ignore: deprecated_member_use
                 : Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 5,
@@ -79,6 +81,7 @@ class _ProductCardState extends State<ProductCard> {
                 top: 8,
                 child: Container(
                   decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
                     color: Colors.black.withOpacity(0.25),
                     shape: BoxShape.circle,
                   ),
@@ -108,6 +111,7 @@ class _ProductCardState extends State<ProductCard> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
                       color: Colors.orange.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(6),
                     ),
