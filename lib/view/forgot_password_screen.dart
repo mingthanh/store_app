@@ -56,15 +56,6 @@ class ForgotPasswordScreen extends StatelessWidget {
                 prefixIcon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
                 controller: _emailController,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!GetUtils.isEmail(value)) {
-                    return 'Please enter a valid email';
-                  }
-                  return null;
-                },
               ),
 
               const SizedBox(height: 24),
@@ -74,7 +65,17 @@ class ForgotPasswordScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // handle send reset link
+                    final email = _emailController.text.trim();
+                    if (email.isEmpty) {
+                      showErrorDialog(context, 'Please enter your email');
+                      return;
+                    }
+                    if (!GetUtils.isEmail(email)) {
+                      showErrorDialog(context, 'Please enter a valid email');
+                      return;
+                    }
+
+                    // ✅ Nếu email hợp lệ
                     showSuccessDialog(context);
                   },
                   style: ElevatedButton.styleFrom(
@@ -113,6 +114,40 @@ class ForgotPasswordScreen extends StatelessWidget {
         ),
         content: Text(
           'We have sent a password reset link to your email.',
+          style: AppTextStyles.withColor(
+            AppTextStyles.bodyLarge,
+            Theme.of(context).textTheme.bodyLarge!.color!,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text(
+              'OK',
+              style: AppTextStyles.withColor(
+                AppTextStyles.buttonMedium,
+                Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ❌ Show error dialog
+  void showErrorDialog(BuildContext context, String message) {
+    Get.dialog(
+      AlertDialog(
+        title: Text(
+          'Error',
+          style: AppTextStyles.withColor(
+            AppTextStyles.h3,
+            Theme.of(context).textTheme.bodyLarge!.color!,
+          ),
+        ),
+        content: Text(
+          message,
           style: AppTextStyles.withColor(
             AppTextStyles.bodyLarge,
             Theme.of(context).textTheme.bodyLarge!.color!,
