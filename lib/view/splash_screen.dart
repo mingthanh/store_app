@@ -12,7 +12,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // navigate based on auth state after 2.5 seconds
+    // Điều hướng sau 2.5 giây
     Future.delayed(const Duration(milliseconds: 2500), () {
       if (authController.isFirstTime.value) {
         Get.off(() => const OnboardingScreen());
@@ -31,14 +31,14 @@ class SplashScreen extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               Theme.of(context).primaryColor,
-              Theme.of(context).primaryColor.withValues(alpha: 0.8),
-              Theme.of(context).primaryColor.withValues(alpha: 0.6),
+              Theme.of(context).primaryColor.withValues(alpha: 0.85),
+              Theme.of(context).primaryColor.withValues(alpha: 0.7),
             ],
           ),
         ),
         child: Stack(
           children: [
-            // Background pattern
+            // Pattern nền
             Positioned.fill(
               child: Opacity(
                 opacity: 0.05,
@@ -46,12 +46,12 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
 
-            // Main content
+            // Nội dung chính
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Animated logo container
+                  // Logo có animation scale
                   TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0.0, end: 1.0),
                     duration: const Duration(milliseconds: 1200),
@@ -74,7 +74,7 @@ class SplashScreen extends StatelessWidget {
                           ),
                           child: Icon(
                             Icons.shopping_bag_outlined,
-                            size: 48,
+                            size: 50,
                             color: Theme.of(context).primaryColor,
                           ),
                         ),
@@ -84,7 +84,7 @@ class SplashScreen extends StatelessWidget {
 
                   const SizedBox(height: 32),
 
-                  // Animated text
+                  // Slogan
                   TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0.0, end: 1.0),
                     duration: const Duration(milliseconds: 1200),
@@ -98,13 +98,13 @@ class SplashScreen extends StatelessWidget {
                       );
                     },
                     child: Text(
-                      'Style Meets Simplicity',
+                      'Step Into Style',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
+                        fontSize: 16,
                         letterSpacing: 2,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),
@@ -112,7 +112,7 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
 
-            // Bottom tagline
+            // Tên shop
             Positioned(
               bottom: 48,
               left: 0,
@@ -132,23 +132,23 @@ class SplashScreen extends StatelessWidget {
                 child: Column(
                   children: const [
                     Text(
-                      "FASHION",
+                      "FASHION SHOES",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 32,
+                        fontSize: 34,
                         fontWeight: FontWeight.w300,
                         letterSpacing: 8,
                       ),
                     ),
-                    Text(
-                      "STORE",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 4,
-                      ),
-                    )
+                    // Text(
+                    //   "SHOES",
+                    //   style: TextStyle(
+                    //     color: Colors.white,
+                    //     fontSize: 34,
+                    //     fontWeight: FontWeight.bold,
+                    //     letterSpacing: 4,
+                    //   ),
+                    // )
                   ],
                 ),
               ),

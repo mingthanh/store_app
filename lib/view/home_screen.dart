@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/view/widgets/category_chips.dart';
 import 'package:store_app/view/widgets/custom_search_bar.dart';
+import 'package:store_app/view/widgets/product_grid.dart';
+import 'package:store_app/view/widgets/sale_banner.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -82,6 +84,47 @@ class HomeScreen extends StatelessWidget {
 
             // categories chip list
             const CategoryChips(),
+
+            // sales banner
+            const SaleBanner(),
+
+            // popular products 
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 16, 
+                vertical: 8
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Popular Products',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        // color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        // Xử lý sự kiện khi người dùng nhấn vào "See All"
+                      },
+                      child: Text(
+                        'See All',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ),
+
+            // products grid
+            const Expanded(
+              child: ProductGrid(),
+            ),
           ],
         ),
       ),
