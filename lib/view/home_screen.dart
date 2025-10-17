@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/view/widgets/category_chips.dart';
 import 'package:store_app/view/widgets/custom_search_bar.dart';
+import 'package:store_app/view/widgets/product_grid.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -34,10 +35,7 @@ class HomeScreen extends StatelessWidget {
                         Text(
                           'Hello, Quái Vật Hồ Lockness!',
                           overflow: TextOverflow.ellipsis, // tránh tràn dòng
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.grey, fontSize: 14),
                         ),
                         Text(
                           'Hope you’re having a great day!',
@@ -82,6 +80,10 @@ class HomeScreen extends StatelessWidget {
 
             // categories chip list
             const CategoryChips(),
+
+            // product grid
+            const SizedBox(height: 8),
+            const Expanded(child: ProductGrid(limit: 50)),
           ],
         ),
       ),

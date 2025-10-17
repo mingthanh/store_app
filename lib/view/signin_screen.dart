@@ -134,7 +134,62 @@ class SigninScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // signup textbutton 
+
+              // Or divider
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey.shade400)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('OR'),
+                  ),
+                  Expanded(child: Divider(color: Colors.grey.shade400)),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Facebook login button (brand style)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.facebook, color: Colors.white),
+                  label: Text(
+                    'Continue with Facebook',
+                    style: AppTextStyles.buttonMedium.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1877F2),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final auth = Get.find<AuthController>();
+                    Get.dialog(
+                      const Center(child: CircularProgressIndicator()),
+                      barrierDismissible: false,
+                    );
+                    final ok = await auth.loginWithFacebook();
+                    Get.back();
+                    if (ok) {
+                      Get.offAll(() => const MainScreen());
+                    } else {
+                      Get.snackbar(
+                        'Login failed',
+                        'Could not sign in with Facebook',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              const SizedBox(height: 24),
+              // signup textbutton
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -145,11 +200,12 @@ class SigninScreen extends StatelessWidget {
                       isDark ? Colors.grey[400]! : Colors.grey[600]!,
                     ),
                   ),
-                  TextButton(onPressed: () => Get.to(() => SignUpScreen()),
-                   child: Text('Sign Up'),
+                  TextButton(
+                    onPressed: () => Get.to(() => SignUpScreen()),
+                    child: Text('Sign Up'),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -171,6 +227,5 @@ class SigninScreen extends StatelessWidget {
       // ❌ Không hợp lệ thì show thông báo (tuỳ chọn)
       // Get.snackbar('Error', 'Please enter valid email and password');
     }
-
   }
 }
