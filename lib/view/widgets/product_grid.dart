@@ -1,14 +1,56 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:store_app/services/firestore_service.dart';
+import 'package:store_app/models/product.dart' as model;
+import 'package:store_app/view/product_details_screen.dart';
+import 'package:store_app/view/widgets/product_card.dart';
 
 class ProductGrid extends StatelessWidget {
   final String? category;
   final int limit;
+  // Nếu true thì dùng danh sách local `products` trong `lib/models/product.dart`
+  final bool useLocal;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
 
-  const ProductGrid({super.key, this.category, this.limit = 50});
+  const ProductGrid({
+    super.key,
+    this.category,
+    this.limit = 50,
+    this.shrinkWrap = false,
+    this.physics,
+    this.useLocal = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (useLocal) {
+      final items = model.products;
+      if (items.isEmpty) return const Center(child: Text('Chưa có sản phẩm'));
+      return GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 0.72,
+        ),
+        shrinkWrap: shrinkWrap,
+        physics: physics ?? (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final p = items[index];
+          return GestureDetector(
+            onTap: () {
+              Get.to(() => ProductDetailsScreen(product: p));
+            },
+            child: ProductCard(product: p),
+          );
+        },
+      );
+    }
+
+    // Nếu dùng Firestore
     return StreamBuilder<List<Map<String, dynamic>>>(
       stream: FirestoreService.instance.productsStream(
         category: category,
@@ -33,13 +75,38 @@ class ProductGrid extends StatelessWidget {
             crossAxisSpacing: 12,
             childAspectRatio: 0.72,
           ),
+          shrinkWrap: shrinkWrap,
+          physics: physics ?? (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
           itemCount: items.length,
           itemBuilder: (context, index) {
             final p = items[index];
             final name = (p['name'] ?? '') as String;
-            final price = (p['price'] as num?)?.toInt() ?? 0;
-            final imageUrl = p['imageUrl'] as String?;
-            return _ProductCard(name: name, price: price, imageUrl: imageUrl);
+            final price = (p['price'] as num?)?.toDouble() ?? 0.0;
+            final imageUrl = p['imageUrl'] as String? ?? '';
+            final category = (p['category'] ?? '') as String;
+            final description = (p['description'] ?? '') as String;
+
+            // ✅ Tạo object Product từ Firestore (có cả id)
+            final product = model.Product(
+              id: p['id'] ?? 0,
+              name: name,
+              price: price,
+              imageUrl: imageUrl,
+              category: category,
+              description: description,
+              isFavorite: false,
+            );
+
+            return GestureDetector(
+              onTap: () {
+                Get.to(() => ProductDetailsScreen(product: product));
+              },
+              child: _ProductCard(
+                name: name,
+                price: price.toInt(),
+                imageUrl: imageUrl,
+              ),
+            );
           },
         );
       },
@@ -62,7 +129,7 @@ class _ProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha((0.05 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -77,7 +144,7 @@ class _ProductCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(12),
               ),
-              child: imageUrl == null
+              child: imageUrl == null || imageUrl!.isEmpty
                   ? Container(
                       color: Colors.grey.shade200,
                       child: const Icon(Icons.image, size: 40),
@@ -119,14 +186,13 @@ class _ProductCard extends StatelessWidget {
   }
 
   String _formatVnd(int p) {
-    // simple formatting: 120000 -> 120.000 đ
     final s = p.toString();
-    final buf = StringBuffer();
+    final buffer = StringBuffer();
     for (int i = 0; i < s.length; i++) {
       final idx = s.length - i;
-      buf.write(s[i]);
-      if (idx > 1 && idx % 3 == 1) buf.write('.');
+      buffer.write(s[i]);
+      if (idx > 1 && idx % 3 == 1) buffer.write('.');
     }
-    return '${buf.toString()} đ';
+    return '${buffer.toString()} đ';
   }
 }

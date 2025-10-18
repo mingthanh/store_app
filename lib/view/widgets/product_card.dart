@@ -45,11 +45,9 @@ class _ProductCardState extends State<ProductCard> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: isDark
-                // ignore: deprecated_member_use
-                ? Colors.black.withOpacity(0.3)
-                // ignore: deprecated_member_use
-                : Colors.grey.withOpacity(0.1),
+      color: isDark
+        ? Colors.black.withAlpha((0.3 * 255).round())
+        : Colors.grey.withAlpha((0.1 * 255).round()),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -81,8 +79,7 @@ class _ProductCardState extends State<ProductCard> {
                 top: 8,
                 child: Container(
                   decoration: BoxDecoration(
-                    // ignore: deprecated_member_use
-                    color: Colors.black.withOpacity(0.25),
+                    color: Colors.black.withAlpha((0.25 * 255).round()),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
@@ -111,8 +108,7 @@ class _ProductCardState extends State<ProductCard> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      // ignore: deprecated_member_use
-                      color: Colors.orange.withOpacity(0.9),
+                      color: Colors.orange.withAlpha((0.9 * 255).round()),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
