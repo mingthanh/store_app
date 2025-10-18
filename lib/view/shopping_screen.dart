@@ -43,7 +43,7 @@ class ShoppingScreen extends StatelessWidget {
             padding: EdgeInsets.only(top: 16),
             child: CategoryChips(),
           ),
-          Expanded(child: ProductGrid())
+          Expanded(child: ProductGrid(useLocal: true))
         ],
       ),
     );

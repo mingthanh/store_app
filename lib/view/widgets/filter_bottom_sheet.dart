@@ -120,10 +120,9 @@ class FilterBottomSheet {
                           // TODO: handle selected state
                         },
                         backgroundColor: Theme.of(context).cardColor,
-                        selectedColor: Theme.of(context)
-                            .primaryColor
-                            // ignore: deprecated_member_use
-                            .withOpacity(0.2),
+            selectedColor: Theme.of(context)
+              .primaryColor
+              .withAlpha((0.2 * 255).round()),
                         labelStyle: AppTextStyles.withColor(
                           AppTextStyles.bodyMedium,
                           category == 'All'

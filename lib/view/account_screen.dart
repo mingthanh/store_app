@@ -67,7 +67,7 @@ class AccountScreen extends StatelessWidget {
                 ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: BorderSide(color: Colors.redAccent.withOpacity(0.5)),
+                  side: BorderSide(color: Colors.redAccent.withAlpha((0.5 * 255).round())),
                 ),
               ),
             ),
