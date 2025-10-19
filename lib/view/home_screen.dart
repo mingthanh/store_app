@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  // final isDark = Theme.of(context).brightness == Brightness.dark; // not used here
+  final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return SafeArea(
       child: Column(
