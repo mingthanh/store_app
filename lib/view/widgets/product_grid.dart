@@ -36,7 +36,9 @@ class ProductGrid extends StatelessWidget {
           childAspectRatio: 0.72,
         ),
         shrinkWrap: shrinkWrap,
-        physics: physics ?? (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
+        physics:
+            physics ??
+            (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
         itemCount: items.length,
         itemBuilder: (context, index) {
           final p = items[index];
@@ -76,22 +78,44 @@ class ProductGrid extends StatelessWidget {
             childAspectRatio: 0.72,
           ),
           shrinkWrap: shrinkWrap,
-          physics: physics ?? (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
+          physics:
+              physics ??
+              (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
           itemCount: items.length,
           itemBuilder: (context, index) {
             final p = items[index];
-            final name = (p['name'] ?? '') as String;
-            final price = (p['price'] as num?)?.toDouble() ?? 0.0;
-            final imageUrl = p['imageUrl'] as String? ?? '';
-            final category = (p['category'] ?? '') as String;
-            final description = (p['description'] ?? '') as String;
+            final name = (p['name'] ?? '').toString();
+            // Giá có thể được lưu dưới dạng số hoặc chuỗi trong Firestore -> handle both
+            final rawPrice = p['price'];
+            double price;
+            if (rawPrice is num) {
+              price = rawPrice.toDouble();
+            } else if (rawPrice is String) {
+              price = double.tryParse(rawPrice) ?? 0.0;
+            } else {
+              price = 0.0;
+            }
+            final imageUrl = (p['imageUrl'] ?? '').toString();
+            final category = (p['category'] ?? '').toString();
+            final description = (p['description'] ?? '').toString();
+
+            // ID cũng có thể là string hoặc int
+            final rawId = p['id'];
+            int id;
+            if (rawId is int) {
+              id = rawId;
+            } else if (rawId is String) {
+              id = int.tryParse(rawId) ?? 0;
+            } else {
+              id = 0;
+            }
 
             // ✅ Tạo object Product từ Firestore (có cả id)
             final product = model.Product(
-              id: p['id'] ?? 0,
+              id: id,
               name: name,
               price: price,
-              imageUrl: imageUrl,
+              imageUrl: imageUrl.isEmpty ? 'assets/images/shoe.jpg' : imageUrl,
               category: category,
               description: description,
               isFavorite: false,

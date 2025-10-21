@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:store_app/controllers/wishlist_controller.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
@@ -9,7 +11,7 @@ double calculateDiscount(double price, double oldPrice) {
   return discount;
 }
 
-class ProductCard extends StatefulWidget {
+class ProductCard extends StatelessWidget {
   final Product product;
 
   const ProductCard({
@@ -18,23 +20,10 @@ class ProductCard extends StatefulWidget {
   });
 
   @override
-  State<ProductCard> createState() => _ProductCardState();
-}
-
-class _ProductCardState extends State<ProductCard> {
-  late bool isFavorite;
-
-  @override
-  void initState() {
-    super.initState();
-    // Lấy trạng thái yêu thích ban đầu từ product
-    isFavorite = widget.product.isFavorite;
-  }
-
-  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final wishlistController = Get.find<WishlistController>();
 
     return Container(
       constraints: BoxConstraints(
@@ -45,9 +34,9 @@ class _ProductCardState extends State<ProductCard> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-      color: isDark
-        ? Colors.black.withAlpha((0.3 * 255).round())
-        : Colors.grey.withAlpha((0.1 * 255).round()),
+            color: isDark
+                ? Colors.black.withAlpha((0.3 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -67,13 +56,13 @@ class _ProductCardState extends State<ProductCard> {
                     top: Radius.circular(12),
                   ),
                   child: Image.asset(
-                    widget.product.imageUrl,
+                    product.imageUrl,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
 
-              // ❤️ Nút yêu thích
+              // ❤️ Nút yêu thích dùng Obx
               Positioned(
                 right: 8,
                 top: 8,
@@ -82,23 +71,23 @@ class _ProductCardState extends State<ProductCard> {
                     color: Colors.black.withAlpha((0.25 * 255).round()),
                     shape: BoxShape.circle,
                   ),
-                  child: IconButton(
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? Colors.red : Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
-                    },
-                  ),
+                  child: Obx(() {
+                    final isFavorite = wishlistController.isFavorite(product);
+                    return IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.white,
+                      ),
+                      onPressed: () {
+                        wishlistController.toggleFavorite(product);
+                      },
+                    );
+                  }),
                 ),
               ),
 
               // 🏷️ Badge giảm giá
-              if (widget.product.oldPrice != null &&
-                  widget.product.oldPrice! > widget.product.price)
+              if (product.oldPrice != null && product.oldPrice! > product.price)
                 Positioned(
                   left: 8,
                   top: 8,
@@ -112,7 +101,7 @@ class _ProductCardState extends State<ProductCard> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      '-${calculateDiscount(widget.product.price, widget.product.oldPrice!).toStringAsFixed(0)}% OFF',
+                      '-${calculateDiscount(product.price, product.oldPrice!).toStringAsFixed(0)}% OFF',
                       style: AppTextStyles.withColor(
                         AppTextStyles.withWeight(
                           AppTextStyles.bodySmall,
@@ -132,9 +121,8 @@ class _ProductCardState extends State<ProductCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tên sản phẩm
                 Text(
-                  widget.product.name,
+                  product.name,
                   style: AppTextStyles.withColor(
                     AppTextStyles.withWeight(
                       AppTextStyles.h3,
@@ -145,25 +133,19 @@ class _ProductCardState extends State<ProductCard> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-
                 SizedBox(height: screenWidth * 0.01),
-
-                // Danh mục sản phẩm
                 Text(
-                  widget.product.category,
+                  product.category,
                   style: AppTextStyles.withColor(
                     AppTextStyles.bodyMedium,
                     isDark ? Colors.grey[400]! : Colors.grey[600]!,
                   ),
                 ),
-
                 SizedBox(height: screenWidth * 0.01),
-
-                // Giá
                 Row(
                   children: [
                     Text(
-                      '\$${widget.product.price.toStringAsFixed(2)}',
+                      '\$${product.price.toStringAsFixed(2)}',
                       style: AppTextStyles.withColor(
                         AppTextStyles.withWeight(
                           AppTextStyles.bodyLarge,
@@ -172,10 +154,10 @@ class _ProductCardState extends State<ProductCard> {
                         Theme.of(context).textTheme.bodyLarge!.color!,
                       ),
                     ),
-                    if (widget.product.oldPrice != null) ...[
+                    if (product.oldPrice != null) ...[
                       const SizedBox(width: 8),
                       Text(
-                        '\$${widget.product.oldPrice!.toStringAsFixed(2)}',
+                        '\$${product.oldPrice!.toStringAsFixed(2)}',
                         style: AppTextStyles.withColor(
                           AppTextStyles.withWeight(
                             AppTextStyles.bodySmall,
