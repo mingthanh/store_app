@@ -6,6 +6,7 @@ import 'package:store_app/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
+import 'utils/translations.dart';
 import 'controllers/navigation_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -26,27 +27,27 @@ Future<void> main() async {
   // ✅ Khởi tạo Firebase (nếu cần)
   try {
     if (!kIsWeb) {
-      await Firebase.initializeApp();
+  await Firebase.initializeApp();
       final box = GetStorage();
       await box.write('firebaseReady', true);
       await box.remove('firebaseInitError');
-      print('[Firebase] initialized successfully');
+  debugPrint('[Firebase] initialized successfully');
 
       // seed sample products
       try {
         final seeded = await FirestoreService.instance.seedSampleProductsIfEmpty();
         if (seeded > 0) {
-          print('[Firestore] Seeded $seeded sample products');
+          debugPrint('[Firestore] Seeded $seeded sample products');
         }
       } catch (e) {
-        print('[Firestore] Seed products error: ${e.toString()}');
+        debugPrint('[Firestore] Seed products error: ${e.toString()}');
       }
     }
   } catch (e) {
     final box = GetStorage();
     await box.write('firebaseReady', false);
     await box.write('firebaseInitError', e.toString());
-    print('[Firebase] initialization error: ${e.toString()}');
+    debugPrint('[Firebase] initialization error: ${e.toString()}');
   }
 
   // ✅ Facebook SDK Web
@@ -68,9 +69,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
+    final box = GetStorage();
+    final savedLocale = box.read('locale') as String?;
+    final locale = savedLocale != null ? Locale(savedLocale.split('_')[0], savedLocale.split('_')[1]) : null;
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Store',
+      translations: AppTranslations(),
+      locale: locale,
+      fallbackLocale: const Locale('en', 'US'),
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
       themeMode: themeController.theme,

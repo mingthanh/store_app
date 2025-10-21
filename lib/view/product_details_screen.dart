@@ -238,15 +238,15 @@ class ProductDetailsScreen extends StatelessWidget {
     final String shareMessage = '$description\nShop now at $shopLink';
 
     try {
-      final ShareResult result = await Share.share(
-        shareMessage,
-        subject: productName,
-        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+      final Rect? origin = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+      await SharePlus.instance.share(
+        ShareParams(
+          text: shareMessage,
+          subject: productName,
+          sharePositionOrigin: origin,
+        ),
       );
-
-      if (result.status == ShareResultStatus.success) {
-        debugPrint('Thanks for sharing!');
-      }
+      debugPrint('Thanks for sharing!');
     } catch (e) {
       debugPrint('Error sharing: $e');
     }
