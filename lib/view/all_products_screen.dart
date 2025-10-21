@@ -44,7 +44,7 @@ class AllProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const ProductGrid(),
+      body: const ProductGrid(useLocal: true),
     );
   }
 }

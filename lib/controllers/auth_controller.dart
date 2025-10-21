@@ -13,9 +13,7 @@ class AuthController extends GetxController {
   final RxBool isFirstTime = true.obs;
   final RxBool isLoggedIn = false.obs;
 
-  // ignore: unused_element
   bool get _isFirstTime => isFirstTime.value;
-  // ignore: unused_element
   bool get _isLoggedIn => isLoggedIn.value;
 
   @override
@@ -35,7 +33,6 @@ class AuthController extends GetxController {
   }
 
   void login() {
-    // Reset navigation to Home tab on login
     if (Get.isRegistered<NavigationController>()) {
       Get.find<NavigationController>().changeIndex(0);
     }
@@ -43,24 +40,26 @@ class AuthController extends GetxController {
     _storage.write('isLoggedIn', true);
   }
 
+  /// ✅ ĐÂY LÀ HÀM LOGOUT CHUẨN
   void logout() {
-    // Reset navigation to Home tab on logout
+    // Reset navigation về tab Home
     if (Get.isRegistered<NavigationController>()) {
       Get.find<NavigationController>().changeIndex(0);
     }
+
+    // Xoá trạng thái đăng nhập cục bộ
     isLoggedIn.value = false;
     _storage.write('isLoggedIn', false);
-    // attempt to log out from Facebook as well (ignore errors)
+
+    // Thoát tài khoản Facebook (nếu có)
     FacebookAuth.instance.logOut().catchError((_) {});
-    // Google Sign-In removed: no Google sign-out
-    // clear cached social data
+
+    // Xoá cache Facebook
     _storage.remove('fbUser');
     _storage.remove('fbToken');
-    // _storage.remove('googleUser'); // removed: no Google data used
   }
 
   /// Facebook Login flow
-  /// Returns true when successfully logged in, false otherwise
   Future<bool> loginWithFacebook() async {
     try {
       final LoginResult result = await FacebookAuth.instance.login(
@@ -69,17 +68,13 @@ class AuthController extends GetxController {
 
       if (result.status == LoginStatus.success) {
         final AccessToken? accessToken = result.accessToken;
-        if (accessToken == null) {
-          return false;
-        }
+        if (accessToken == null) return false;
 
-        // Optionally fetch user data
         final userData = await FacebookAuth.instance.getUserData(
           fields: 'id,name,email,picture.width(200)',
         );
-        // You can store userData if needed, or send token to your backend.
+
         try {
-          // Ensure Firebase is initialized before Firestore usage
           if (Firebase.apps.isEmpty) {
             await Firebase.initializeApp();
           }
@@ -97,15 +92,13 @@ class AuthController extends GetxController {
               extra: {'provider': 'facebook'},
             );
             debugPrint('[Auth] Firestore upsert completed for $id');
-          } else {
-            debugPrint('[Auth] Missing Facebook id in userData, skip upsert');
           }
         } catch (e) {
           _storage.write('firestoreLastError', e.toString());
           debugPrint('[Auth] Firestore upsert error: ${e.toString()}');
         }
 
-        // Reset navigation to Home tab on successful login
+        // Cập nhật trạng thái đăng nhập
         if (Get.isRegistered<NavigationController>()) {
           Get.find<NavigationController>().changeIndex(0);
         }
@@ -113,16 +106,14 @@ class AuthController extends GetxController {
         _storage.write('isLoggedIn', true);
         _storage.write('fbUser', userData);
         _storage.write('fbToken', accessToken.tokenString);
+
         return true;
       } else {
-        // cancelled or failed
         return false;
       }
     } catch (e) {
-      // log error and return false
+      debugPrint('[Auth] Facebook login error: $e');
       return false;
     }
   }
-
-  // Google Sign-In removed on request
 }
