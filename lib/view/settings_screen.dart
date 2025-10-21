@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:get_storage/get_storage.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -21,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Settings',
+          'settings'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -34,62 +35,94 @@ class SettingsScreen extends StatelessWidget {
           children: [
             _buildSection(
               context,
-              'Appearance',
+              'appearance'.tr,
               [
                 _buildThemeToggle(context),
               ],
             ),
             _buildSection(
               context,
-              'Notifications',
+              'notifications'.tr,
               [
                 _buildSwitchTile(
                   context,
-                  'Push Notifications',
-                  'Receive push notifications about orders and promotions',
+                  'push_notifications'.tr,
+                  'receive_push_sub'.tr,
                   true,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'Notifications',
+              'notifications'.tr,
               [
                 _buildSwitchTile(
                   context,
-                  'Email Notifications',
-                  'Receive mail updates about your orders',
+                  'email_notifications'.tr,
+                  'receive_email_sub'.tr,
                   false,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'Privacy',
+              'privacy'.tr,
               [
                 _buildNavigationTile(
                   context,
-                  'Privacy Policy',
-                  'View our privacy policy',
+                  'privacy_policy'.tr,
+                  'view_privacy'.tr,
                   Icons.privacy_tip_outlined,
                 ),
                 _buildNavigationTile(
                   context,
-                  'Terms of Service',
-                  'Read our terms of service',
+                  'terms_of_service'.tr,
+                  'read_terms'.tr,
                   Icons.description_outlined,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'About',
+              'about'.tr,
               [
                 _buildNavigationTile(
                   context,
-                  'App Version',
+                  'app_version'.tr,
                   '1.0.0',
                   Icons.info_outline,
+                ),
+                const SizedBox(height: 12),
+                // Language selector
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'language'.tr,
+                        style: AppTextStyles.withColor(
+                          AppTextStyles.bodyMedium,
+                          Theme.of(context).textTheme.bodyLarge!.color!,
+                        ),
+                      ),
+                      DropdownButton<String>(
+                        value: Get.locale?.toString() ?? 'en_US',
+                          items: [
+                          DropdownMenuItem(value: 'en_US', child: Text('english'.tr)),
+                          DropdownMenuItem(value: 'vi_VN', child: Text('vietnamese'.tr)),
+                        ],
+                        onChanged: (val) {
+                          if (val == null) return;
+                          final parts = val.split('_');
+                          final locale = Locale(parts[0], parts[1]);
+                          Get.updateLocale(locale);
+                          final box = GetStorage();
+                          box.write('locale', val);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -128,16 +161,16 @@ class SettingsScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GetBuilder<ThemeController>(
-      builder: (controller) => Container(
+            builder: (controller) => Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: isDark
-                  ? Colors.black.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.1),
+                      color: isDark
+                          ? Colors.black.withAlpha((0.2 * 255).round())
+                          : Colors.grey.withAlpha((0.1 * 255).round()),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -158,7 +191,8 @@ class SettingsScreen extends StatelessWidget {
           trailing: Switch.adaptive(
             value: controller.isDarkMode,
             onChanged: (value) => controller.toggleTheme(),
-            activeColor: Theme.of(context).primaryColor,
+            activeThumbColor: Theme.of(context).primaryColor,
+            activeTrackColor: Theme.of(context).primaryColor.withAlpha((0.2 * 255).round()),
           ),
         ),
       ),
@@ -179,10 +213,10 @@ class SettingsScreen extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
+            BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -206,7 +240,8 @@ class SettingsScreen extends StatelessWidget {
         trailing: Switch.adaptive(
           value: initialValue,
           onChanged: (value) {},
-          activeColor: Theme.of(context).primaryColor,
+          activeThumbColor: Theme.of(context).primaryColor,
+          activeTrackColor: Theme.of(context).primaryColor.withAlpha((0.2 * 255).round()),
         ),
       ),
     );
@@ -228,8 +263,8 @@ class SettingsScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
