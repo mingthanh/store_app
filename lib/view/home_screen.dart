@@ -3,10 +3,11 @@ import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/view/all_products_screen.dart';
 import 'package:store_app/view/cart_screen.dart';
-import 'package:store_app/view/widgets/category_chips.dart';
-import 'package:store_app/view/widgets/custom_search_bar.dart';
-import 'package:store_app/view/widgets/product_grid.dart';
-import 'package:store_app/view/widgets/sale_banner.dart';
+import 'package:store_app/view/notifications_screen.dart';
+import 'package:store_app/widgets/category_chips.dart';
+import 'package:store_app/widgets/custom_search_bar.dart';
+import 'package:store_app/widgets/product_grid.dart';
+import 'package:store_app/widgets/sale_banner.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -19,7 +20,7 @@ class HomeScreen extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-            // 🧑 Header
+            // Header
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -50,7 +51,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () => Get.to(() => NotificationsScreen()),
                     icon: const Icon(Icons.notifications_outlined),
                   ),
                   IconButton(

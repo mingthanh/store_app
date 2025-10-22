@@ -9,14 +9,13 @@ class WishlistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final wishlistController = Get.find<WishlistController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'My Wishlist',
+          'my_wishlist'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -74,11 +73,12 @@ class WishlistScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Column(
+          Expanded(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '$count Items',
+                'items_count'.trParams({'count': '$count'}),
                 style: AppTextStyles.withColor(
                   AppTextStyles.h2,
                   Theme.of(context).textTheme.bodyLarge!.color!,
@@ -86,26 +86,30 @@ class WishlistScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'in your wishlist',
+                'wishlist_in_your'.tr,
                 style: AppTextStyles.withColor(
                   AppTextStyles.bodyMedium,
                   isDark ? Colors.grey[400]! : Colors.grey[600]!,
                 ),
               ),
             ],
-          ),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: Text(
-              'Add all to cart',
-              style: AppTextStyles.withColor(
-                AppTextStyles.buttonMedium,
-                Colors.white,
+          )),
+          const SizedBox(width: 12),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 180),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+              child: Text(
+                'add_all_to_cart'.tr,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.withColor(
+                  AppTextStyles.buttonMedium,
+                  Colors.white,
+                ),
               ),
             ),
           ),
@@ -124,8 +128,8 @@ class WishlistScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

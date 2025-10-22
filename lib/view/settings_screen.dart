@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
+import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'Settings',
+          'settings_title'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -34,60 +35,61 @@ class SettingsScreen extends StatelessWidget {
           children: [
             _buildSection(
               context,
-              'Appearance',
+              'appearance'.tr,
               [
                 _buildThemeToggle(context),
+                _buildLanguageTile(context),
               ],
             ),
             _buildSection(
               context,
-              'Notifications',
+              'notifications'.tr,
               [
                 _buildSwitchTile(
                   context,
-                  'Push Notifications',
-                  'Receive push notifications about orders and promotions',
+                  'push_notifications'.tr,
+                  'push_notifications_desc'.tr,
                   true,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'Notifications',
+              'notifications'.tr,
               [
                 _buildSwitchTile(
                   context,
-                  'Email Notifications',
-                  'Receive mail updates about your orders',
+                  'email_notifications'.tr,
+                  'email_notifications_desc'.tr,
                   false,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'Privacy',
+              'privacy'.tr,
               [
                 _buildNavigationTile(
                   context,
-                  'Privacy Policy',
-                  'View our privacy policy',
+                  'privacy_policy'.tr,
+                  'privacy_policy_desc'.tr,
                   Icons.privacy_tip_outlined,
                 ),
                 _buildNavigationTile(
                   context,
-                  'Terms of Service',
-                  'Read our terms of service',
+                  'terms_of_service'.tr,
+                  'terms_of_service_desc'.tr,
                   Icons.description_outlined,
                 ),
               ],
             ),
             _buildSection(
               context,
-              'About',
+              'about'.tr,
               [
                 _buildNavigationTile(
                   context,
-                  'App Version',
+                  'app_version'.tr,
                   '1.0.0',
                   Icons.info_outline,
                 ),
@@ -136,8 +138,8 @@ class SettingsScreen extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.1),
+                  ? Colors.black.withAlpha((0.2 * 255).round())
+                  : Colors.grey.withAlpha((0.1 * 255).round()),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -149,7 +151,7 @@ class SettingsScreen extends StatelessWidget {
             color: Theme.of(context).primaryColor,
           ),
           title: Text(
-            'Dark Mode',
+            'dark_mode'.tr,
             style: AppTextStyles.withColor(
               AppTextStyles.bodyMedium,
               Theme.of(context).textTheme.bodyLarge!.color!,
@@ -158,7 +160,10 @@ class SettingsScreen extends StatelessWidget {
           trailing: Switch.adaptive(
             value: controller.isDarkMode,
             onChanged: (value) => controller.toggleTheme(),
-            activeColor: Theme.of(context).primaryColor,
+            thumbColor: WidgetStatePropertyAll(Theme.of(context).primaryColor),
+            trackColor: WidgetStatePropertyAll(
+              Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+            ),
           ),
         ),
       ),
@@ -181,8 +186,8 @@ class SettingsScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -206,7 +211,10 @@ class SettingsScreen extends StatelessWidget {
         trailing: Switch.adaptive(
           value: initialValue,
           onChanged: (value) {},
-          activeColor: Theme.of(context).primaryColor,
+          thumbColor: WidgetStatePropertyAll(Theme.of(context).primaryColor),
+          trackColor: WidgetStatePropertyAll(
+            Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+          ),
         ),
       ),
     );
@@ -228,8 +236,8 @@ class SettingsScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.2)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -259,6 +267,60 @@ class SettingsScreen extends StatelessWidget {
           color: isDark ? Colors.grey[400] : Colors.grey[600],
         ),
         onTap: () {},
+      ),
+    );
+  }
+
+  Widget _buildLanguageTile(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GetBuilder<LanguageController>(
+      builder: (controller) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withAlpha((0.2 * 255).round())
+                  : Colors.grey.withAlpha((0.1 * 255).round()),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ListTile(
+          leading: Icon(
+            Icons.language,
+            color: Theme.of(context).primaryColor,
+          ),
+          title: Text(
+            'language'.tr,
+            style: AppTextStyles.withColor(
+              AppTextStyles.bodyMedium,
+              Theme.of(context).textTheme.bodyLarge!.color!,
+            ),
+          ),
+          subtitle: Text(
+            'language_desc'.tr,
+            style: AppTextStyles.withColor(
+              AppTextStyles.bodySmall,
+              isDark ? Colors.grey[400]! : Colors.grey[600]!,
+            ),
+          ),
+          trailing: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: controller.locale.languageCode,
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'vi', child: Text('Tiếng Việt')),
+              ],
+              onChanged: (v) {
+                if (v != null) controller.setLanguage(v);
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
