@@ -59,8 +59,10 @@ class WishlistScreen extends StatelessWidget {
     );
   }
 
+  /// 🔹 Summary section - top part showing item count
   Widget _buildSummarySection(BuildContext context, int count) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -70,42 +72,54 @@ class WishlistScreen extends StatelessWidget {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // 🧱 Left text section
           Expanded(
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'items_count'.trParams({'count': '$count'}),
-                style: AppTextStyles.withColor(
-                  AppTextStyles.h2,
-                  Theme.of(context).textTheme.bodyLarge!.color!,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'items_count'.trParams({'count': '$count'}),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.withColor(
+                    AppTextStyles.h2,
+                    Theme.of(context).textTheme.bodyLarge!.color!,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'wishlist_in_your'.tr,
-                style: AppTextStyles.withColor(
-                  AppTextStyles.bodyMedium,
-                  isDark ? Colors.grey[400]! : Colors.grey[600]!,
+                const SizedBox(height: 4),
+                Text(
+                  'wishlist_in_your'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.withColor(
+                    AppTextStyles.bodyMedium,
+                    isDark ? Colors.grey[400]! : Colors.grey[600]!,
+                  ),
                 ),
-              ),
-            ],
-          )),
+              ],
+            ),
+          ),
+
           const SizedBox(width: 12),
+
+          // 🧡 Add all to cart button (width constrained to avoid overflow)
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 180),
+            constraints: const BoxConstraints(maxWidth: 160),
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                minimumSize: const Size(0, 40),
               ),
               child: Text(
                 'add_all_to_cart'.tr,
+                textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: AppTextStyles.withColor(
                   AppTextStyles.buttonMedium,
                   Colors.white,
@@ -118,6 +132,7 @@ class WishlistScreen extends StatelessWidget {
     );
   }
 
+  /// 🔹 Single Wishlist Item Card
   Widget _buildWishlistItem(BuildContext context, Product product) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -160,6 +175,8 @@ class WishlistScreen extends StatelessWidget {
                       AppTextStyles.bodyLarge,
                       Theme.of(context).textTheme.bodyLarge!.color!,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -168,6 +185,8 @@ class WishlistScreen extends StatelessWidget {
                       AppTextStyles.bodySmall,
                       isDark ? Colors.grey[400]! : Colors.grey[600]!,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Row(

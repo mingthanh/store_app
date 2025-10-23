@@ -1,14 +1,13 @@
 {
   "project_info": {
-    "project_number": "266430193923",
-    "firebase_url": "https://onclassflutter-nguyenthanhdanh-default-rtdb.asia-southeast1.firebasedatabase.app",
-    "project_id": "onclassflutter-nguyenthanhdanh",
-    "storage_bucket": "onclassflutter-nguyenthanhdanh.firebasestorage.app"
+    "project_number": "262793312227",
+    "project_id": "store-app-68de5",
+    "storage_bucket": "store-app-68de5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:266430193923:android:9e5ab8edbdde6aa221c936",
+        "mobilesdk_app_id": "1:262793312227:android:fc802fa28d516b94a0d2d6",
         "android_client_info": {
           "package_name": "com.example.doanmonhocapp"
         }
@@ -16,26 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDaFB8-cjF6wlhneezBQczUSa2y-LNtBDY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:266430193923:android:e825491bada1399721c936",
-        "android_client_info": {
-          "package_name": "com.example.doanmonhocapp"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDaFB8-cjF6wlhneezBQczUSa2y-LNtBDY"
+          "current_key": "AIzaSyAAnVc6zxGvUXiKKTBnWU53JAVXHlLXYt0"
         }
       ],
       "services": {

@@ -239,7 +239,7 @@ class ProductDetailsScreen extends StatelessWidget {
   final String shareMessage =
     '$description\n${'share_shop_now'.trParams({'link': shopLink})}';
     try {
-      // ignore: deprecated_member_use
+      // ignore: deprecated_member_use, unused_local_variable
       final ShareResult result = await Share.share(
         shareMessage,
         subject: productName,

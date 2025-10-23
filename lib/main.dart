@@ -8,25 +8,30 @@ import 'package:store_app/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
-import 'utils/translations.dart';
 import 'controllers/navigation_controller.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'utils/app_secrets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:store_app/services/firestore_service.dart';
+import 'firebase_options.dart';
+
+// ...
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
 
-  // ✅ Khởi tạo các controller càng sớm càng tốt
   Get.put(ThemeController());
   Get.put(LanguageController());
   Get.put(AuthController());
   Get.put(NavigationController());
   Get.put(WishlistController()); // ✅ Controller này cần sớm có mặt
 
+await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+);
   // ✅ Khởi tạo Firebase (nếu cần)
   try {
     if (!kIsWeb) {
@@ -79,14 +84,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'My Store',
       translations: AppTranslations(),
-      locale: locale,
+      locale: languageController.locale,
       fallbackLocale: const Locale('en', 'US'),
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
       themeMode: themeController.theme,
-      translations: AppTranslations(),
-      locale: languageController.locale,
-      fallbackLocale: const Locale('en', 'US'),
       defaultTransition: Transition.fade,
       home: SplashScreen(),
     );

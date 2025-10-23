@@ -7,6 +7,7 @@ import 'package:store_app/shipping_address/shipping_address_screen.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/view/settings_screen.dart';
 import 'package:store_app/view/signin_screen.dart';
+import 'package:store_app/view/help_center_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -155,7 +156,7 @@ class AccountScreen extends StatelessWidget {
                 } else if (key == 'shipping_address') {
                   Get.to(() => ShippingAddressScreen());
                 } else if (key == 'help_center') {
-                  // TODO: Navigation to Help Center
+                  Get.to(() => const HelpCenterScreen());
                 }
               },
             ),

@@ -9,6 +9,7 @@ class CustomTextfield extends StatefulWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final String? initialValue;
 
   const CustomTextfield({super.key, 
     required this.label,
@@ -18,6 +19,7 @@ class CustomTextfield extends StatefulWidget {
     this.controller,
     this.validator,
     this.onChanged,
+    this.initialValue,
   });
 
   @override
@@ -32,6 +34,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       controller: widget.controller,
+      initialValue: widget.initialValue,
       obscureText: widget.isPassword && _obscureText,
       keyboardType: widget.keyboardType,
       validator: widget.validator,

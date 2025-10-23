@@ -4,6 +4,7 @@ import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:store_app/view/terms_of_service_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -81,6 +82,7 @@ class SettingsScreen extends StatelessWidget {
                   'terms_of_service'.tr,
                   'terms_of_service_desc'.tr,
                   Icons.description_outlined,
+                  onTap: () => Get.to(() => const TermsOfServiceScreen()),
                 ),
               ],
             ),
@@ -258,6 +260,7 @@ class SettingsScreen extends StatelessWidget {
     String title,
     String subtitle,
     IconData icon,
+    {VoidCallback? onTap}
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -299,7 +302,7 @@ class SettingsScreen extends StatelessWidget {
           Icons.chevron_right,
           color: isDark ? Colors.grey[400] : Colors.grey[600],
         ),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }
