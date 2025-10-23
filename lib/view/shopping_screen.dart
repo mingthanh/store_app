@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:store_app/utils/app_textstyles.dart';
-import 'package:store_app/view/widgets/category_chips.dart';
-import 'package:store_app/view/widgets/filter_bottom_sheet.dart';
-import 'package:store_app/view/widgets/product_grid.dart';
+import 'package:store_app/widgets/category_chips.dart';
+import 'package:store_app/widgets/filter_bottom_sheet.dart';
+import 'package:store_app/widgets/product_grid.dart';
 
 class ShoppingScreen extends StatelessWidget {
   const ShoppingScreen({super.key});

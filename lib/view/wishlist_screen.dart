@@ -9,7 +9,6 @@ class WishlistScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  // Access controller through GetBuilder below; avoid unused local variable
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -74,50 +73,38 @@ class WishlistScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          // Make the left text block flexible so it shrinks and the button keeps its constrained width
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$count ${'items'.tr}',
-                  style: AppTextStyles.withColor(
-                    AppTextStyles.h2,
-                    Theme.of(context).textTheme.bodyLarge!.color!,
-                  ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'items_count'.trParams({'count': '$count'}),
+                style: AppTextStyles.withColor(
+                  AppTextStyles.h2,
+                  Theme.of(context).textTheme.bodyLarge!.color!,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'in_your_wishlist'.tr,
-                  style: AppTextStyles.withColor(
-                    AppTextStyles.bodyMedium,
-                    isDark ? Colors.grey[400]! : Colors.grey[600]!,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'wishlist_in_your'.tr,
+                style: AppTextStyles.withColor(
+                  AppTextStyles.bodyMedium,
+                  isDark ? Colors.grey[400]! : Colors.grey[600]!,
                 ),
-              ],
-            ),
-          ),
-          // Constrain the button itself (not only the inner text) so the Row can
-          // lay out predictably on small screens and with long localized strings.
+              ),
+            ],
+          )),
+          const SizedBox(width: 12),
           ConstrainedBox(
-            constraints: BoxConstraints(
-              // allow up to ~30% of screen width for the button
-              maxWidth: MediaQuery.of(context).size.width * 0.30,
-              minWidth: 0,
-            ),
+            constraints: const BoxConstraints(maxWidth: 180),
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                // allow the button to be smaller than the default minimum
-                minimumSize: const Size(0, 0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
               child: Text(
                 'add_all_to_cart'.tr,
-                textAlign: TextAlign.center,
-                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.withColor(
                   AppTextStyles.buttonMedium,
@@ -140,9 +127,9 @@ class WishlistScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-      color: isDark
-        ? Colors.black.withAlpha((0.2 * 255).round())
-        : Colors.grey.withAlpha((0.1 * 255).round()),
+            color: isDark
+                ? Colors.black.withAlpha((0.2 * 255).round())
+                : Colors.grey.withAlpha((0.1 * 255).round()),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

@@ -13,7 +13,7 @@ class AuthController extends GetxController {
   final RxBool isFirstTime = true.obs;
   final RxBool isLoggedIn = false.obs;
 
-  // Removed unused private getters to satisfy analyzer (access state via `isFirstTime`/`isLoggedIn` directly)
+  // Removed unused private getters to satisfy analyzer
 
   @override
   void onInit() {

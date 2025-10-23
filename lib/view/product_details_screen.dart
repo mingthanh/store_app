@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:get/get.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/utils/app_textstyles.dart';
-import 'package:store_app/view/widgets/size_selector.dart';
+import 'package:store_app/widgets/size_selector.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -27,7 +28,7 @@ class ProductDetailsScreen extends StatelessWidget {
           color: isDark ? Colors.white : Colors.black,
         ),
         title: Text(
-          'Details',
+          'details_title'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -125,7 +126,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
                   // Select size
                   Text(
-                    'Select Size',
+                    'select_size'.tr,
                     style: AppTextStyles.withColor(
                       AppTextStyles.labelMedium,
                       Theme.of(context).textTheme.bodyLarge!.color!,
@@ -138,7 +139,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
                   // Description
                   Text(
-                    'Description',
+                    'description'.tr,
                     style: AppTextStyles.withColor(
                       AppTextStyles.labelMedium,
                       Theme.of(context).textTheme.bodyLarge!.color!,
@@ -185,7 +186,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     color: Theme.of(context).textTheme.bodyLarge!.color!,
                   ),
                   label: Text(
-                    'Add To Cart',
+                    'add_to_cart'.tr,
                     style: AppTextStyles.withColor(
                       AppTextStyles.labelMedium,
                       Theme.of(context).textTheme.bodyLarge!.color!,
@@ -210,9 +211,9 @@ class ProductDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   icon: const Icon(Icons.credit_card, color: Colors.white),
-                  label: const Text(
-                    'Buy Now',
-                    style: TextStyle(
+                  label: Text(
+                    'buy_now'.tr,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
@@ -233,18 +234,16 @@ class ProductDetailsScreen extends StatelessWidget {
     String description,
   ) async {
     final box = context.findRenderObject() as RenderBox?;
-    const String shopLink =
-        'https://www.nike.com/vn/w/jordan-shoes-37eefzy7ok';
-    final String shareMessage = '$description\nShop now at $shopLink';
-
+  const String shopLink =
+    'https://www.nike.com/vn/w/jordan-shoes-37eefzy7ok';
+  final String shareMessage =
+    '$description\n${'share_shop_now'.trParams({'link': shopLink})}';
     try {
-      final Rect? origin = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
-      await SharePlus.instance.share(
-        ShareParams(
-          text: shareMessage,
-          subject: productName,
-          sharePositionOrigin: origin,
-        ),
+      // ignore: deprecated_member_use
+      final ShareResult result = await Share.share(
+        shareMessage,
+        subject: productName,
+        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
       );
       debugPrint('Thanks for sharing!');
     } catch (e) {

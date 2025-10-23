@@ -1,6 +1,6 @@
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
-import 'package:store_app/view/widgets/custom_textfield.dart';
+import 'package:store_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'main_screen.dart';

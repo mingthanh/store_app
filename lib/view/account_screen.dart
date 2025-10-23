@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/features/profile/edit_profile/views/screens/edit_profile_screen.dart';
+import 'package:store_app/features/orders/view/screen/my_order_screen.dart';
+import 'package:store_app/shipping_address/shipping_address_screen.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/view/settings_screen.dart';
 import 'package:store_app/view/signin_screen.dart';
@@ -15,7 +18,7 @@ class AccountScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'My Account',
+          'my_account'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -76,7 +79,7 @@ class AccountScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           OutlinedButton(
-            onPressed: () {},
+            onPressed: () => Get.to(() => EditProfileScreen()),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               side: BorderSide(
@@ -87,7 +90,7 @@ class AccountScreen extends StatelessWidget {
               ),
             ),
             child: Text(
-              'Edit Profile',
+              'edit_profile'.tr,
               style: AppTextStyles.withColor(
                 AppTextStyles.buttonMedium,
                 Theme.of(context).textTheme.bodyLarge!.color!,
@@ -102,10 +105,10 @@ class AccountScreen extends StatelessWidget {
   Widget _buildMenuSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final menuItems = [
-      {'icon': Icons.shopping_bag_outlined, 'title': 'My Orders'},
-      {'icon': Icons.location_on_outlined, 'title': 'Shipping Address'},
-      {'icon': Icons.help_outline, 'title': 'Help Center'},
-      {'icon': Icons.logout_outlined, 'title': 'Logout'},
+      {'icon': Icons.shopping_bag_outlined, 'key': 'my_orders'},
+      {'icon': Icons.location_on_outlined, 'key': 'shipping_address'},
+      {'icon': Icons.help_outline, 'key': 'help_center'},
+      {'icon': Icons.logout_outlined, 'key': 'logout'},
     ];
 
     return Padding(
@@ -120,8 +123,8 @@ class AccountScreen extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: isDark
-              ? Colors.black.withAlpha((0.2 * 255).round())
-                : Colors.grey.withAlpha((0.1 * 255).round()),
+                      ? Colors.black.withAlpha((0.2 * 255).round())
+                      : Colors.grey.withAlpha((0.1 * 255).round()),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -133,7 +136,7 @@ class AccountScreen extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
               ),
               title: Text(
-                item['title'] as String,
+                (item['key'] as String).tr,
                 style: AppTextStyles.withColor(
                   AppTextStyles.bodyMedium,
                   Theme.of(context).textTheme.bodyLarge!.color!,
@@ -144,13 +147,14 @@ class AccountScreen extends StatelessWidget {
                 color: isDark ? Colors.grey[400] : Colors.grey[600],
               ),
               onTap: () {
-                if (item['title'] == 'Logout') {
+                final key = item['key'] as String;
+                if (key == 'logout') {
                   _showLogoutDialog(context);
-                } else if (item['title'] == 'My Orders') {
-                  // TODO: Navigation to My Orders
-                } else if (item['title'] == 'Shipping Address') {
-                  // TODO: Navigation to Shipping Address
-                } else if (item['title'] == 'Help Center') {
+                } else if (key == 'my_orders') {
+                  Get.to(() => MyOrderScreen());
+                } else if (key == 'shipping_address') {
+                  Get.to(() => ShippingAddressScreen());
+                } else if (key == 'help_center') {
                   // TODO: Navigation to Help Center
                 }
               },
@@ -177,7 +181,9 @@ class AccountScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withAlpha((0.1 * 255).round()),
+                color: Theme.of(context)
+                    .primaryColor
+                    .withAlpha((0.1 * 255).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -188,7 +194,7 @@ class AccountScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Are you sure you want to logout?',
+              'are_you_sure_logout'.tr,
               style: AppTextStyles.withColor(
                 AppTextStyles.bodyMedium,
                 isDark ? Colors.grey[400]! : Colors.grey[600]!,
@@ -210,7 +216,7 @@ class AccountScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Cancel',
+                      'cancel'.tr,
                       style: AppTextStyles.withColor(
                       AppTextStyles.buttonMedium,
                       Theme.of(context).textTheme.bodyLarge!.color!,
@@ -235,7 +241,7 @@ class AccountScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Logout',
+                      'logout'.tr,
                       style: AppTextStyles.withColor(
                       AppTextStyles.buttonMedium,
                       Colors.white,

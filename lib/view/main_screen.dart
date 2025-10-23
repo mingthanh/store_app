@@ -6,7 +6,7 @@ import 'package:store_app/view/home_screen.dart';
 import 'package:store_app/view/shopping_screen.dart';
 import 'package:store_app/view/wishlist_screen.dart';
 import '../controllers/navigation_controller.dart';
-import 'widgets/custom_bottom_navbar.dart';
+import '../widgets/custom_bottom_navbar.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});

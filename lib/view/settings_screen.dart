@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
+import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -22,7 +23,7 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          'settings'.tr,
+          'settings_title'.tr,
           style: AppTextStyles.withColor(
             AppTextStyles.h3,
             isDark ? Colors.white : Colors.black,
@@ -38,6 +39,7 @@ class SettingsScreen extends StatelessWidget {
               'appearance'.tr,
               [
                 _buildThemeToggle(context),
+                _buildLanguageTile(context),
               ],
             ),
             _buildSection(
@@ -47,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
                 _buildSwitchTile(
                   context,
                   'push_notifications'.tr,
-                  'receive_push_sub'.tr,
+                  'push_notifications_desc'.tr,
                   true,
                 ),
               ],
@@ -59,7 +61,7 @@ class SettingsScreen extends StatelessWidget {
                 _buildSwitchTile(
                   context,
                   'email_notifications'.tr,
-                  'receive_email_sub'.tr,
+                  'email_notifications_desc'.tr,
                   false,
                 ),
               ],
@@ -71,13 +73,13 @@ class SettingsScreen extends StatelessWidget {
                 _buildNavigationTile(
                   context,
                   'privacy_policy'.tr,
-                  'view_privacy'.tr,
+                  'privacy_policy_desc'.tr,
                   Icons.privacy_tip_outlined,
                 ),
                 _buildNavigationTile(
                   context,
                   'terms_of_service'.tr,
-                  'read_terms'.tr,
+                  'terms_of_service_desc'.tr,
                   Icons.description_outlined,
                 ),
               ],
@@ -168,9 +170,9 @@ class SettingsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-                      color: isDark
-                          ? Colors.black.withAlpha((0.2 * 255).round())
-                          : Colors.grey.withAlpha((0.1 * 255).round()),
+              color: isDark
+                  ? Colors.black.withAlpha((0.2 * 255).round())
+                  : Colors.grey.withAlpha((0.1 * 255).round()),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -182,7 +184,7 @@ class SettingsScreen extends StatelessWidget {
             color: Theme.of(context).primaryColor,
           ),
           title: Text(
-            'Dark Mode',
+            'dark_mode'.tr,
             style: AppTextStyles.withColor(
               AppTextStyles.bodyMedium,
               Theme.of(context).textTheme.bodyLarge!.color!,
@@ -191,8 +193,10 @@ class SettingsScreen extends StatelessWidget {
           trailing: Switch.adaptive(
             value: controller.isDarkMode,
             onChanged: (value) => controller.toggleTheme(),
-            activeThumbColor: Theme.of(context).primaryColor,
-            activeTrackColor: Theme.of(context).primaryColor.withAlpha((0.2 * 255).round()),
+            thumbColor: WidgetStatePropertyAll(Theme.of(context).primaryColor),
+            trackColor: WidgetStatePropertyAll(
+              Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+            ),
           ),
         ),
       ),
@@ -240,8 +244,10 @@ class SettingsScreen extends StatelessWidget {
         trailing: Switch.adaptive(
           value: initialValue,
           onChanged: (value) {},
-          activeThumbColor: Theme.of(context).primaryColor,
-          activeTrackColor: Theme.of(context).primaryColor.withAlpha((0.2 * 255).round()),
+          thumbColor: WidgetStatePropertyAll(Theme.of(context).primaryColor),
+          trackColor: WidgetStatePropertyAll(
+            Theme.of(context).primaryColor.withAlpha((0.3 * 255).round()),
+          ),
         ),
       ),
     );
@@ -294,6 +300,60 @@ class SettingsScreen extends StatelessWidget {
           color: isDark ? Colors.grey[400] : Colors.grey[600],
         ),
         onTap: () {},
+      ),
+    );
+  }
+
+  Widget _buildLanguageTile(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GetBuilder<LanguageController>(
+      builder: (controller) => Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: isDark
+                  ? Colors.black.withAlpha((0.2 * 255).round())
+                  : Colors.grey.withAlpha((0.1 * 255).round()),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ListTile(
+          leading: Icon(
+            Icons.language,
+            color: Theme.of(context).primaryColor,
+          ),
+          title: Text(
+            'language'.tr,
+            style: AppTextStyles.withColor(
+              AppTextStyles.bodyMedium,
+              Theme.of(context).textTheme.bodyLarge!.color!,
+            ),
+          ),
+          subtitle: Text(
+            'language_desc'.tr,
+            style: AppTextStyles.withColor(
+              AppTextStyles.bodySmall,
+              isDark ? Colors.grey[400]! : Colors.grey[600]!,
+            ),
+          ),
+          trailing: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: controller.locale.languageCode,
+              items: const [
+                DropdownMenuItem(value: 'en', child: Text('English')),
+                DropdownMenuItem(value: 'vi', child: Text('Tiếng Việt')),
+              ],
+              onChanged: (v) {
+                if (v != null) controller.setLanguage(v);
+              },
+            ),
+          ),
+        ),
       ),
     );
   }

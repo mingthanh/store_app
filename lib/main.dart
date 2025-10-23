@@ -1,7 +1,9 @@
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/controllers/theme_controller.dart';
+import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/controllers/wishlist_controller.dart';
 import 'package:store_app/utils/app_themes.dart';
+import 'package:store_app/utils/translations.dart';
 import 'package:store_app/view/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
@@ -20,6 +22,7 @@ Future<void> main() async {
 
   // ✅ Khởi tạo các controller càng sớm càng tốt
   Get.put(ThemeController());
+  Get.put(LanguageController());
   Get.put(AuthController());
   Get.put(NavigationController());
   Get.put(WishlistController()); // ✅ Controller này cần sớm có mặt
@@ -40,14 +43,16 @@ Future<void> main() async {
           debugPrint('[Firestore] Seeded $seeded sample products');
         }
       } catch (e) {
-        debugPrint('[Firestore] Seed products error: ${e.toString()}');
+
+  debugPrint('[Firestore] Seed products error: ${e.toString()}');
       }
     }
   } catch (e) {
     final box = GetStorage();
     await box.write('firebaseReady', false);
     await box.write('firebaseInitError', e.toString());
-    debugPrint('[Firebase] initialization error: ${e.toString()}');
+
+  debugPrint('[Firebase] initialization error: ${e.toString()}');
   }
 
   // ✅ Facebook SDK Web
@@ -69,9 +74,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
-    final box = GetStorage();
-    final savedLocale = box.read('locale') as String?;
-    final locale = savedLocale != null ? Locale(savedLocale.split('_')[0], savedLocale.split('_')[1]) : null;
+    final languageController = Get.find<LanguageController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Store',
@@ -81,6 +84,9 @@ class MyApp extends StatelessWidget {
       theme: AppThemes.light,
       darkTheme: AppThemes.dark,
       themeMode: themeController.theme,
+      translations: AppTranslations(),
+      locale: languageController.locale,
+      fallbackLocale: const Locale('en', 'US'),
       defaultTransition: Transition.fade,
       home: SplashScreen(),
     );
