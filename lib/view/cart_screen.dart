@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/models/product.dart';
+import 'package:store_app/controllers/cart_controller.dart';
+import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class CartScreen extends StatelessWidget {
@@ -8,7 +10,9 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final cart = Get.put(CartController(), permanent: true);
+  final auth = Get.find<AuthController>();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -29,22 +33,29 @@ class CartScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: products.length,
-              itemBuilder: (context, index) => _buildCartItem(
-                context,
-                products[index],
-              ),
-            ),
+            child: Obx(() {
+              final items = cart.items.values.toList();
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: items.length,
+                itemBuilder: (context, index) => _buildCartItem(
+                  context,
+                  items[index].product,
+                  quantity: items[index].quantity,
+                  onInc: () => cart.increment(items[index].product),
+                  onDec: () => cart.decrement(items[index].product),
+                  onRemove: () => cart.remove(items[index].product),
+                ),
+              );
+            }),
           ),
-          _buildCartSummary(context),
+          _buildCartSummary(context, cart, auth),
         ],
       ),
     );
   }
 
-  Widget _buildCartItem(BuildContext context, Product product) {
+  Widget _buildCartItem(BuildContext context, Product product, {int quantity = 1, VoidCallback? onInc, VoidCallback? onDec, VoidCallback? onRemove}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -94,7 +105,7 @@ class CartScreen extends StatelessWidget {
                       )),
                       IconButton(
                         onPressed: () =>
-                            _showDeleteConfirmationDialog(context, product),
+                            _showDeleteConfirmationDialog(context, product, onRemove),
                         icon: const Icon(Icons.delete_outlined),
                         color: Colors.red[400],
                       ),
@@ -121,21 +132,21 @@ class CartScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             IconButton(
-                                onPressed: () {},
+                                onPressed: onDec,
                                 icon: Icon(
                                   Icons.remove,
                                   size: 20,
                                   color: Theme.of(context).primaryColor,
                                 )),
                             Text(
-                              '1',
+                              '$quantity',
                               style: AppTextStyles.withColor(
                                 AppTextStyles.bodyLarge,
                                 Theme.of(context).primaryColor,
                               ),
                             ),
                             IconButton(
-                                onPressed: () {},
+                                onPressed: onInc,
                                 icon: Icon(
                                   Icons.add,
                                   size: 20,
@@ -155,7 +166,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, Product product) {
+  void _showDeleteConfirmationDialog(BuildContext context, Product product, VoidCallback? onConfirm) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Get.dialog(
@@ -228,7 +239,7 @@ class CartScreen extends StatelessWidget {
                 Expanded(
                     child: ElevatedButton(
                         onPressed: () {
-                          // TODO: Xử lý xóa item ở đây
+                          onConfirm?.call();
                           Get.back();
                         },
                         style: ElevatedButton.styleFrom(
@@ -254,7 +265,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCartSummary(BuildContext context) {
+  Widget _buildCartSummary(BuildContext context, CartController cart, AuthController auth) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -274,28 +285,35 @@ class CartScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Total (4 items)',
+              Obx(() => Text(
+                'Total (${cart.totalItems} items)',
                 style: AppTextStyles.withColor(
                   AppTextStyles.bodyMedium,
                   Theme.of(context).textTheme.bodyLarge!.color!,
                 ),
-              ),
-              Text(
-                '\$999.99',
+              )),
+              Obx(() => Text(
+                '\$${cart.totalPrice.toStringAsFixed(2)}',
                 style: AppTextStyles.withColor(
                   AppTextStyles.h2,
                   Theme.of(context).primaryColor,
                 ),
-              )
+              ))
             ],
           ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                // TODO: navigate to checkout
+              onPressed: () async {
+                if (auth.userId.value == null) {
+                  Get.snackbar('Login required', 'Please sign in to place order', snackPosition: SnackPosition.BOTTOM);
+                  return;
+                }
+                final orderId = await cart.checkout(auth.userId.value!);
+                if (orderId != null) {
+                  Get.snackbar('Order Placed', 'Your order #$orderId has been placed successfully.', snackPosition: SnackPosition.BOTTOM);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,

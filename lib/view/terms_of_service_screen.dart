@@ -45,7 +45,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...sections.map((s) => _buildSection(context, s['t'] as String, s['b'] as String)).toList(),
+          ...sections.map((s) => _buildSection(context, s['t'] as String, s['b'] as String)),
         ],
       ),
     );

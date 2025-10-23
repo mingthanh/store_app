@@ -215,17 +215,22 @@ class SigninScreen extends StatelessWidget {
 
   void handleSignIn() {
     final AuthController authController = Get.find<AuthController>();
+    if (!_formKey.currentState!.validate()) return;
 
-    // ✅ Kiểm tra validator trước khi login
-    if (_formKey.currentState!.validate()) {
-      authController.login(
-        // _emailController.text.trim(),
-        // _passwordController.text.trim(),
-      );
-      Get.offAll(() => const MainScreen());
-    } else {
-      // ❌ Không hợp lệ thì show thông báo (tuỳ chọn)
-      // Get.snackbar('Error', 'Please enter valid email and password');
-    }
+    Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+    authController
+        .signInWithEmail(_emailController.text.trim(), _passwordController.text.trim())
+        .then((ok) {
+      Get.back();
+      if (ok) {
+        if (authController.role.value == 'admin') {
+          Get.offAllNamed('/admin');
+        } else {
+          Get.offAll(() => const MainScreen());
+        }
+      } else {
+        Get.snackbar('Login failed', 'Invalid credentials', snackPosition: SnackPosition.BOTTOM);
+      }
+    });
   }
 }

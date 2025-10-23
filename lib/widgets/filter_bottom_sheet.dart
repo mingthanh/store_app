@@ -5,6 +5,10 @@ import 'package:store_app/utils/app_textstyles.dart';
 class FilterBottomSheet {
   static void show(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Local state for filters
+    String selectedCategory = 'All';
+    final minCtrl = TextEditingController();
+    final maxCtrl = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -58,6 +62,7 @@ class FilterBottomSheet {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: minCtrl,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: 'Min',
@@ -76,6 +81,7 @@ class FilterBottomSheet {
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
+                      controller: maxCtrl,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: 'Max',
@@ -115,9 +121,11 @@ class FilterBottomSheet {
                     .map(
                       (category) => FilterChip(
                         label: Text(category),
-                        selected: category == 'All',
+                        selected: category == selectedCategory,
                         onSelected: (selected) {
-                          // TODO: handle selected state
+                          setState(() {
+                            selectedCategory = category;
+                          });
                         },
                         backgroundColor: Theme.of(context).cardColor,
             selectedColor: Theme.of(context)
@@ -125,7 +133,7 @@ class FilterBottomSheet {
               .withAlpha((0.2 * 255).round()),
                         labelStyle: AppTextStyles.withColor(
                           AppTextStyles.bodyMedium,
-                          category == 'All'
+                          category == selectedCategory
                           ? Theme.of(context).primaryColor
                           : Theme.of(context).textTheme.bodyLarge!.color!,
                         ),
@@ -141,7 +149,13 @@ class FilterBottomSheet {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Get.back();
+                    final min = int.tryParse(minCtrl.text.trim());
+                    final max = int.tryParse(maxCtrl.text.trim());
+                    Get.back(result: {
+                      'category': selectedCategory,
+                      'minPrice': min,
+                      'maxPrice': max,
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),

@@ -6,9 +6,15 @@ import 'package:store_app/shipping_address/repositories/address_repository.dart'
 import 'package:store_app/shipping_address/widget/address_card.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
-class ShippingAddressScreen extends StatelessWidget {
+class ShippingAddressScreen extends StatefulWidget {
+  const ShippingAddressScreen({super.key});
+
+  @override
+  State<ShippingAddressScreen> createState() => _ShippingAddressScreenState();
+}
+
+class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
   final AddressRepository _repository = AddressRepository();
-  ShippingAddressScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +59,17 @@ class ShippingAddressScreen extends StatelessWidget {
     return AddressCard(
       address: address,
       onEdit: () => _showEditAddressBottomSheet(context, address),
-      onDelete: () => _showDeleteConfirmationDialog(context),
+      onDelete: () => _showDeleteConfirmationDialog(context, address.id),
     );
   }
 
   void _showEditAddressBottomSheet(BuildContext context, Address address) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelCtrl = TextEditingController(text: address.label);
+    final fullCtrl = TextEditingController(text: address.fullAddress);
+    final cityCtrl = TextEditingController(text: address.city);
+    final stateCtrl = TextEditingController(text: address.state);
+    final zipCtrl = TextEditingController(text: address.zipCode);
 
     Get.bottomSheet(
       Container(
@@ -97,21 +108,21 @@ class ShippingAddressScreen extends StatelessWidget {
               context,
               'Label (e.g., Home, Office)',
               Icons.label_outline,
-              initialValue: address.label,
+              controller: labelCtrl,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               context,
               'Full Address',
               Icons.location_on_outlined,
-              initialValue: address.fullAddress,
+              controller: fullCtrl,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               context,
               'City',
               Icons.location_city_outlined,
-              initialValue: address.city,
+              controller: cityCtrl,
             ),
             const SizedBox(height: 16),
             Row(
@@ -121,7 +132,7 @@ class ShippingAddressScreen extends StatelessWidget {
                     context,
                     'State',
                     Icons.map_outlined,
-                    initialValue: address.state,
+                    controller: stateCtrl,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -130,7 +141,7 @@ class ShippingAddressScreen extends StatelessWidget {
                     context,
                     'Zip Code',
                     Icons.pin_outlined,
-                    initialValue: address.zipCode,
+                    controller: zipCtrl,
                   ),
                 ),
               ],
@@ -140,7 +151,18 @@ class ShippingAddressScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // handle update address
+                  final updated = Address(
+                    id: address.id,
+                    label: labelCtrl.text.trim(),
+                    fullAddress: fullCtrl.text.trim(),
+                    city: cityCtrl.text.trim(),
+                    state: stateCtrl.text.trim(),
+                    zipCode: zipCtrl.text.trim(),
+                    isDefault: address.isDefault,
+                    type: address.type,
+                  );
+                  _repository.updateAddress(updated);
+                  setState(() {});
                   Get.back();
                 },
                 style: ElevatedButton.styleFrom(
@@ -172,11 +194,13 @@ class ShippingAddressScreen extends StatelessWidget {
     String label,
     IconData icon, {
     String? initialValue,
+    TextEditingController? controller,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return TextFormField(
-      initialValue: initialValue,
+      controller: controller,
+      initialValue: controller == null ? initialValue : null,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: Theme.of(context).primaryColor),
@@ -202,7 +226,7 @@ class ShippingAddressScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context, String addressId) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Get.dialog(
@@ -272,7 +296,8 @@ class ShippingAddressScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: handle delete action
+                      _repository.deleteAddress(addressId);
+                      setState(() {});
                       Get.back();
                     },
                     style: ElevatedButton.styleFrom(
@@ -302,6 +327,11 @@ class ShippingAddressScreen extends StatelessWidget {
 
   void _showAddAddressBottomSheet(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelCtrl = TextEditingController();
+    final fullCtrl = TextEditingController();
+    final cityCtrl = TextEditingController();
+    final stateCtrl = TextEditingController();
+    final zipCtrl = TextEditingController();
 
     Get.bottomSheet(
       Container(
@@ -340,18 +370,21 @@ class ShippingAddressScreen extends StatelessWidget {
               context,
               'Label (e.g. Home, Office)',
               Icons.label_outline,
+              controller: labelCtrl,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               context,
               'Full Address',
               Icons.location_on_outlined,
+              controller: fullCtrl,
             ),
             const SizedBox(height: 16),
             _buildTextField(
               context,
               'City',
               Icons.location_city_outlined,
+              controller: cityCtrl,
             ),
             const SizedBox(height: 16),
             Row(
@@ -361,6 +394,7 @@ class ShippingAddressScreen extends StatelessWidget {
                     context,
                     'State',
                     Icons.location_on_outlined,
+                    controller: stateCtrl,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -369,6 +403,7 @@ class ShippingAddressScreen extends StatelessWidget {
                     context,
                     'Zip Code',
                     Icons.location_on_outlined,
+                    controller: zipCtrl,
                   ),
                 ),
               ],
@@ -378,7 +413,17 @@ class ShippingAddressScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: handle save address
+                  final id = DateTime.now().millisecondsSinceEpoch.toString();
+                  final address = Address(
+                    id: id,
+                    label: labelCtrl.text.trim(),
+                    fullAddress: fullCtrl.text.trim(),
+                    city: cityCtrl.text.trim(),
+                    state: stateCtrl.text.trim(),
+                    zipCode: zipCtrl.text.trim(),
+                  );
+                  _repository.addAddress(address);
+                  setState(() {});
                   Get.back();
                 },
                 style: ElevatedButton.styleFrom(

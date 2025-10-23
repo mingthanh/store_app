@@ -16,6 +16,8 @@ class FirestoreService {
       users.doc(userId).collection('cart');
   CollectionReference<Map<String, dynamic>> get products =>
       _db.collection('products');
+  CollectionReference<Map<String, dynamic>> get orders =>
+    _db.collection('orders');
 
   // User
   Future<void> upsertUserProfile({
@@ -34,6 +36,64 @@ class FirestoreService {
     };
     await users.doc(userId).set(data, SetOptions(merge: true));
     debugPrint('[Firestore] upsertUserProfile ok: userId=$userId');
+  }
+
+  // Orders
+  Future<String> createOrder({
+    required String userId,
+    required List<Map<String, dynamic>> items,
+    required int totalAmount,
+    String status = 'processing',
+  }) async {
+    final doc = await orders.add({
+      'userId': userId,
+      'items': items,
+      'totalAmount': totalAmount,
+      'status': status,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    debugPrint('[Firestore] createOrder ok: id=${doc.id}');
+    return doc.id;
+  }
+
+  Future<void> updateOrderStatus({
+    required String orderId,
+    required String status,
+  }) async {
+    await orders.doc(orderId).update({
+      'status': status,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    debugPrint('[Firestore] updateOrderStatus ok: id=$orderId status=$status');
+  }
+
+  Stream<List<Map<String, dynamic>>> ordersStream({String? status}) {
+    Query<Map<String, dynamic>> q = orders.orderBy('createdAt', descending: true);
+    if (status != null) {
+      q = q.where('status', isEqualTo: status);
+    }
+    return q.snapshots().map(
+          (s) => s.docs.map((d) => {'id': d.id, ...d.data()}).toList(),
+        );
+  }
+
+  Future<Map<String, num>> ordersSummary() async {
+    final snap = await orders.get();
+    int count = snap.docs.length;
+    int revenue = 0;
+    final byStatus = <String, int>{};
+    for (final d in snap.docs) {
+      final m = d.data();
+      revenue += (m['totalAmount'] as num?)?.toInt() ?? 0;
+      final st = (m['status'] as String?) ?? 'processing';
+      byStatus[st] = (byStatus[st] ?? 0) + 1;
+    }
+    return {
+      'count': count,
+      'revenue': revenue,
+      ...byStatus.map((k, v) => MapEntry('status_$k', v)),
+    };
   }
 
   // Wishlist

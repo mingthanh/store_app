@@ -3,8 +3,10 @@ import 'package:get_storage/get_storage.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:store_app/controllers/navigation_controller.dart';
 import 'package:store_app/services/firestore_service.dart';
+import 'package:store_app/services/auth_service.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 // Google Sign-In removed
 
 class AuthController extends GetxController {
@@ -12,6 +14,8 @@ class AuthController extends GetxController {
 
   final RxBool isFirstTime = true.obs;
   final RxBool isLoggedIn = false.obs;
+  final RxString role = 'user'.obs;
+  final RxnString userId = RxnString();
 
   // Removed unused private getters to satisfy analyzer
 
@@ -32,11 +36,50 @@ class AuthController extends GetxController {
   }
 
   void login() {
+    // Legacy local login kept for compatibility
     if (Get.isRegistered<NavigationController>()) {
       Get.find<NavigationController>().changeIndex(0);
     }
     isLoggedIn.value = true;
     _storage.write('isLoggedIn', true);
+  }
+
+  Future<bool> signInWithEmail(String email, String password) async {
+    try {
+      final cred = await AuthService.instance.signIn(email: email, password: password);
+      userId.value = cred.user?.uid;
+      isLoggedIn.value = true;
+      _storage.write('isLoggedIn', true);
+      // read role from user doc (best-effort)
+      final doc = await FirestoreService.instance.users.doc(userId.value).get();
+      final r = (doc.data()?['role'] as String?) ?? 'user';
+      role.value = r;
+      return true;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[Auth] signIn error: ${e.code}');
+      return false;
+    }
+  }
+
+  Future<bool> signUpWithEmail(String name, String email, String password) async {
+    try {
+      final cred = await AuthService.instance.signUp(name: name, email: email, password: password);
+      userId.value = cred.user?.uid;
+      isLoggedIn.value = true;
+      _storage.write('isLoggedIn', true);
+      final doc = await FirestoreService.instance.users.doc(userId.value).get();
+      final r = (doc.data()?['role'] as String?) ?? 'user';
+      role.value = r;
+      return true;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[Auth] signUp error: ${e.code}');
+      return false;
+    }
+  }
+
+  Future<void> signOut() async {
+    await AuthService.instance.signOut();
+    logout();
   }
 
   /// ✅ ĐÂY LÀ HÀM LOGOUT CHUẨN

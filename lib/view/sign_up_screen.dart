@@ -1,4 +1,5 @@
 import 'package:store_app/view/main_screen.dart';
+import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
@@ -137,11 +138,24 @@ class SignUpScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // ✅ Kiểm tra validate trước khi đăng ký
-                      if (_formKey.currentState!.validate()) {
-                        // ✅ Nếu hợp lệ thì điều hướng
-                        Get.off(() => const MainScreen());
+                    onPressed: () async {
+                      if (!_formKey.currentState!.validate()) return;
+                      final auth = Get.find<AuthController>();
+                      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+                      final ok = await auth.signUpWithEmail(
+                        _nameController.text.trim(),
+                        _emailController.text.trim(),
+                        _passwordController.text.trim(),
+                      );
+                      Get.back();
+                      if (ok) {
+                        if (auth.role.value == 'admin') {
+                          Get.offAllNamed('/admin');
+                        } else {
+                          Get.offAll(() => const MainScreen());
+                        }
+                      } else {
+                        Get.snackbar('Sign up failed', 'Please try again', snackPosition: SnackPosition.BOTTOM);
                       }
                     },
                     style: ElevatedButton.styleFrom(

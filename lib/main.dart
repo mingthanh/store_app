@@ -14,6 +14,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'utils/app_secrets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:store_app/services/firestore_service.dart';
+import 'package:store_app/view/admin_dashboard_screen.dart';
 import 'firebase_options.dart';
 
 // ...
@@ -90,6 +91,9 @@ class MyApp extends StatelessWidget {
       darkTheme: AppThemes.dark,
       themeMode: themeController.theme,
       defaultTransition: Transition.fade,
+      getPages: [
+        GetPage(name: '/admin', page: () => const AdminDashboardScreen()),
+      ],
       home: SplashScreen(),
     );
   }
