@@ -1,3 +1,4 @@
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/custom_textfield.dart';
@@ -167,12 +168,12 @@ class SigninScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
-                    final auth = Get.find<AuthController>();
+                    final fbAuth = Get.find<AuthController>();
                     Get.dialog(
                       const Center(child: CircularProgressIndicator()),
                       barrierDismissible: false,
                     );
-                    final ok = await auth.loginWithFacebook();
+                    final ok = await fbAuth.loginWithFacebook();
                     Get.back();
                     if (ok) {
                       Get.offAll(() => const MainScreen());
@@ -214,7 +215,7 @@ class SigninScreen extends StatelessWidget {
   }
 
   void handleSignIn() {
-    final AuthController authController = Get.find<AuthController>();
+  final ApiAuthController authController = Get.find<ApiAuthController>();
     if (!_formKey.currentState!.validate()) return;
 
     Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
@@ -223,14 +224,18 @@ class SigninScreen extends StatelessWidget {
         .then((ok) {
       Get.back();
       if (ok) {
-        if (authController.role.value == 'admin') {
+        if (authController.isAdmin) {
           Get.offAllNamed('/admin');
         } else {
           Get.offAll(() => const MainScreen());
         }
       } else {
-        Get.snackbar('Login failed', 'Invalid credentials', snackPosition: SnackPosition.BOTTOM);
+        final msg = authController.lastError.value.isNotEmpty
+            ? authController.lastError.value
+            : 'Invalid credentials';
+        Get.snackbar('Login failed', msg, snackPosition: SnackPosition.BOTTOM);
       }
-    });
+    }
+    );
   }
 }

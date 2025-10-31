@@ -3,6 +3,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:get/get.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/controllers/cart_controller.dart';
+import 'package:store_app/view/cart_screen.dart';
 import 'package:store_app/widgets/size_selector.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
@@ -56,11 +58,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 // Product image
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.asset(
-                    product.imageUrl,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildProductImage(product.imageUrl),
                 ),
 
                 // Favorite button
@@ -104,7 +102,7 @@ class ProductDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '\$${product.price.toStringAsFixed(2)}',
+                        _formatPrice(product.price, product.imageUrl),
                         style: AppTextStyles.withColor(
                           AppTextStyles.h2,
                           Theme.of(context).textTheme.headlineMedium!.color!,
@@ -169,7 +167,11 @@ class ProductDetailsScreen extends StatelessWidget {
               // Add to Cart
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    final cart = Get.put(CartController(), permanent: true);
+                    cart.add(product, qty: 1);
+                    Get.snackbar('Added to cart', product.name, snackPosition: SnackPosition.BOTTOM);
+                  },
                   style: OutlinedButton.styleFrom(
                     padding: EdgeInsets.symmetric(
                       vertical: screenHeight * 0.02,
@@ -200,7 +202,11 @@ class ProductDetailsScreen extends StatelessWidget {
               // 💳 Buy Now
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    final cart = Get.put(CartController(), permanent: true);
+                    cart.add(product, qty: 1);
+                    Get.to(() => const CartScreen());
+                  },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.symmetric(
                       vertical: screenHeight * 0.02,
@@ -249,5 +255,42 @@ class ProductDetailsScreen extends StatelessWidget {
     } catch (e) {
       debugPrint('Error sharing: $e');
     }
+  }
+
+  Widget _buildProductImage(String url) {
+    final isNetwork = url.startsWith('http');
+    if (isNetwork) {
+      return Image.network(
+        url,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Colors.grey.shade200,
+          child: const Icon(Icons.broken_image),
+        ),
+      );
+    }
+    return Image.asset(
+      url,
+      width: double.infinity,
+      fit: BoxFit.cover,
+    );
+  }
+
+  String _formatPrice(double price, String imageUrl) {
+    // Heuristic: Firestore products use VND and network images
+    final isVnd = imageUrl.startsWith('http');
+    if (!isVnd) {
+      return '\$${price.toStringAsFixed(2)}';
+    }
+    final p = price.round();
+    final s = p.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      final idx = s.length - i;
+      buffer.write(s[i]);
+      if (idx > 1 && idx % 3 == 1) buffer.write('.');
+    }
+    return '${buffer.toString()} đ';
   }
 }

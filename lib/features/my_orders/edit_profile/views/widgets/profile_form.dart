@@ -3,7 +3,11 @@ import 'package:get/get.dart';
 import 'package:store_app/widgets/custom_textfield.dart';
 
 class ProfileForm extends StatelessWidget {
-  const ProfileForm({super.key});
+  final TextEditingController nameController;
+  final TextEditingController phoneController;
+  final TextEditingController emailController;
+
+  const ProfileForm({super.key, required this.nameController, required this.phoneController, required this.emailController});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +21,7 @@ class ProfileForm extends StatelessWidget {
             CustomTextfield(
               label: 'full_name'.tr,
               prefixIcon: Icons.person_outline,
-              initialValue: 'Quái vật hồ LochNess',
+              controller: nameController,
             ),
             isDark,
           ),
@@ -27,7 +31,8 @@ class ProfileForm extends StatelessWidget {
             CustomTextfield(
               label: 'phone_number'.tr,
               prefixIcon: Icons.phone_outlined,
-              initialValue: '0393759985',
+              keyboardType: TextInputType.phone,
+              controller: phoneController,
             ),
             isDark,
           ),
@@ -37,7 +42,8 @@ class ProfileForm extends StatelessWidget {
             CustomTextfield(
               label: 'email'.tr,
               prefixIcon: Icons.email_outlined,
-              initialValue: 'trankimthanh230@gmail.com',
+              controller: emailController,
+              readOnly: true,
             ),
             isDark,
           ),

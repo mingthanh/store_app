@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:get/get.dart';
+import 'package:store_app/view/all_products_screen.dart';
 
 class SaleBanner extends StatelessWidget {
   const SaleBanner({super.key});
@@ -51,7 +53,9 @@ class SaleBanner extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 18, vertical: 10),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => const AllProductsScreen());
+                },
                 child: const Text(
                   'Shop Now',
                   style: TextStyle(

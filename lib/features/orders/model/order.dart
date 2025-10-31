@@ -18,4 +18,5 @@ class Order {
   });
 
   String get statusString => status.name;
+  String get dateString => '${orderDate.year}-${orderDate.month.toString().padLeft(2,'0')}-${orderDate.day.toString().padLeft(2,'0')}';
 }

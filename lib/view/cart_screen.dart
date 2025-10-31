@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/controllers/cart_controller.dart';
-import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/repositories/order_api_repository.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -12,7 +13,7 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final cart = Get.put(CartController(), permanent: true);
-  final auth = Get.find<AuthController>();
+  final apiAuth = Get.find<ApiAuthController>();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -49,7 +50,7 @@ class CartScreen extends StatelessWidget {
               );
             }),
           ),
-          _buildCartSummary(context, cart, auth),
+          _buildCartSummary(context, cart, apiAuth),
         ],
       ),
     );
@@ -78,12 +79,19 @@ class CartScreen extends StatelessWidget {
           ClipRRect(
             borderRadius:
                 const BorderRadius.horizontal(left: Radius.circular(16)),
-            child: Image.asset(
-              product.imageUrl,
-              width: 100,
-              height: 100,
-              fit: BoxFit.cover,
-            ),
+            child: (product.imageUrl.startsWith('http://') || product.imageUrl.startsWith('https://'))
+                ? Image.network(
+                    product.imageUrl,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    product.imageUrl,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Expanded(
             child: Padding(
@@ -265,7 +273,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCartSummary(BuildContext context, CartController cart, AuthController auth) {
+  Widget _buildCartSummary(BuildContext context, CartController cart, ApiAuthController auth) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -306,13 +314,30 @@ class CartScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
-                if (auth.userId.value == null) {
+                if (!auth.isLoggedIn.value) {
                   Get.snackbar('Login required', 'Please sign in to place order', snackPosition: SnackPosition.BOTTOM);
                   return;
                 }
-                final orderId = await cart.checkout(auth.userId.value!);
-                if (orderId != null) {
-                  Get.snackbar('Order Placed', 'Your order #$orderId has been placed successfully.', snackPosition: SnackPosition.BOTTOM);
+                // Create a minimal order via API using local products data
+                final items = cart.items.values.map((e) => {
+                  'name': e.product.name,
+                  'price': e.product.price,
+                  'quantity': e.quantity,
+                }).toList();
+                final total = cart.totalPrice;
+                try {
+                  await OrderApiRepository.instance.createOrder(
+                    auth.token.value!,
+                    {
+                      'items': items,
+                      'totalAmount': total,
+                    },
+                  );
+                  cart.items.clear();
+                  cart.items.refresh();
+                  Get.snackbar('Order placed', 'Your order has been created', snackPosition: SnackPosition.BOTTOM);
+                } catch (e) {
+                  Get.snackbar('Checkout failed', e.toString().replaceFirst('Exception: ', ''), snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
                 }
               },
               style: ElevatedButton.styleFrom(

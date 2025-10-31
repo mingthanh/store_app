@@ -1,57 +1,69 @@
-# 🛍️ Store App
+# Store App (Flutter + Node/Express + MongoDB)
 
-Đây là **đồ án môn học: Lập trình trên thiết bị di động**, được xây dựng bằng **Flutter**.
+Ứng dụng mua sắm giày dép, client Flutter (GetX) kết nối API Node/Express (MongoDB). Admin quản trị sản phẩm/đơn hàng/người dùng; người dùng duyệt sản phẩm, giỏ hàng, đặt hàng, xem đơn và chỉnh sửa hồ sơ (kèm đổi avatar).
 
-## 🧩 Giới thiệu
+## 1) Kiến trúc
+- Client: Flutter 3.19+ (Dart 3.9+), GetX, http, file_picker.
+- Server: Node 20+, Express + Mongoose + JWT; upload ảnh với Multer, phục vụ tĩnh `/uploads`.
+- Auth: JWT (role 0=admin, 1=user).
 
-Ứng dụng **Store App** là một ứng dụng mua sắm trực tuyến mẫu, giúp người dùng:
-- Xem danh sách sản phẩm
-- Xem chi tiết từng sản phẩm
-- Thêm sản phẩm vào giỏ hàng
-- (Tùy chọn) Thanh toán hoặc quản lý tài khoản người dùng
+## 2) Chuẩn bị
+- Cài Flutter SDK, Node.js, MongoDB, Android Studio cho emulator (nếu chạy Android).
 
-Mục tiêu của dự án là **nắm vững quy trình phát triển ứng dụng Flutter đa nền tảng** (Android, iOS, Web, Desktop).
+## 3) Chạy server API
+```powershell
+# Cài dependency (lần đầu)
+pwsh -NoProfile -Command "Set-Location -LiteralPath 'D:\\WorkSpace\\LT_Mobile\\store_app\\server'; npm install"
 
-## ⚙️ Công nghệ sử dụng
-- **Flutter** (Dart)
-- **Provider / GetX / Bloc** (tuỳ theo kiến trúc bạn chọn)
-- **Firebase / REST API** (nếu có kết nối backend)
-- **Material Design** cho giao diện
+# (Tuỳ chọn) Tạo .env tại folder server
+# PORT=3000
+# MONGO_URI=mongodb://127.0.0.1:27017/store_app
+# MONGO_DB=store_app
+# JWT_SECRET=dev_secret
 
-## 🚀 Cách chạy dự án
+# Chạy server
+pwsh -NoProfile -Command "Set-Location -LiteralPath 'D:\\WorkSpace\\LT_Mobile\\store_app\\server'; npm start"
+```
+Mặc định chạy ở `http://localhost:3000` và phục vụ ảnh tại `http://localhost:3000/uploads/...`.
 
-1. Cài đặt Flutter (nếu chưa có):  
-   👉 [Hướng dẫn cài đặt Flutter](https://docs.flutter.dev/get-started/install)
+## 4) Chạy app Flutter
+```powershell
+flutter pub get
+flutter run
+```
+Base URL tự động:
+- Web/Desktop/iOS simulator: `http://localhost:3000`
+- Android emulator: `http://10.0.2.2:3000`
+Có thể override:
+```powershell
+flutter run --dart-define=API_BASE_URL=http://192.168.1.10:3000
+```
 
-2. Clone dự án:
-   ```bash
-   git clone https://github.com/mingthanh/store_app.git
+## 5) Tính năng
+- Admin Dashboard: Products / Orders / Users, upload ảnh hoặc nhập URL ảnh, đổi trạng thái đơn, chỉnh vai trò user.
+- User: Duyệt sản phẩm (API), filter theo danh mục ở Shopping, wishlist, giỏ hàng, đặt hàng, xem đơn của tôi.
+- Hồ sơ: cập nhật tên/điện thoại, đổi avatar từ gallery (upload) hoặc dán URL trực tiếp.
 
-## Facebook Login integration
+## 6) Upload ảnh
+- `POST /api/uploads/images` (admin only, multipart field `image`), phản hồi `{ url: "/uploads/images/<file>" }`.
+- Client ghép `ApiService.baseUrl` khi server trả relative URL.
 
-This app includes optional "Login with Facebook" using `flutter_facebook_auth`.
+## 7) Những file quan trọng
+- `lib/services/api_service.dart` – HTTP client, tự chọn baseUrl theo platform (có chú thích tiếng Việt).
+- `lib/widgets/category_chips.dart` – Chip danh mục, hỗ trợ controlled (cha điều khiển) hoặc tự quản lý.
+- `lib/view/shopping_screen.dart` – Sử dụng `ProductGrid(useApi: true)` và filter category theo chips.
+- `lib/widgets/product_grid.dart` – Lưới sản phẩm từ API (Image.network với fallback).
+- `lib/view/admin_dashboard_api_screen.dart` – Dashboard; dialog thêm/sửa có nút Upload (file_picker + UploadRepository).
+- `lib/features/my_orders/edit_profile/views/widgets/profile_image.dart` – Đổi avatar (gallery upload hoặc dán URL).
+- `lib/repositories/*` – Gọi API: sản phẩm, đơn hàng, người dùng, upload.
+- `server/src/index.js` – Khởi động server, mount routes, phục vụ tĩnh `/uploads`.
+- `server/src/routes/uploads.js` – Route upload ảnh (admin only).
 
-Setup steps:
+## 8) Sự cố thường gặp
+- Android báo `Requested internal only, but not enough space` khi cài APK:
+  - Device Manager > Wipe Data hoặc tăng Internal Storage; hoặc `adb uninstall com.example.store_app` và dọn `/data/local/tmp`.
+- Android không gọi được `localhost` của host:
+  - Đã dùng `10.0.2.2` tự động. Nếu vẫn lỗi, kiểm tra firewall/port.
 
-1) Create a Facebook App at https://developers.facebook.com/apps and enable Facebook Login (Android, iOS, Web).
-
-2) Replace placeholders with your real values:
-   - `lib/utils/app_secrets.dart`: `facebookAppId`, `facebookClientToken`.
-   - `android/app/src/main/res/values/strings.xml`: `facebook_app_id`, `facebook_client_token`.
-
-3) Android configuration
-   - Ensure the Manifest contains INTERNET permission and meta-data. We've scaffolded these in `android/app/src/main/AndroidManifest.xml`.
-   - In Facebook App settings, add your Android Package Name and default Activity (`com.your.package` and `.MainActivity`), and add key hashes for debug/release.
-
-4) iOS configuration (if you target iOS)
-   - Open `ios/Runner/Info.plist` and add keys for `CFBundleURLTypes` (fb{APP_ID}), `FacebookAppID`, `FacebookClientToken`, `FacebookDisplayName`, and `LSApplicationQueriesSchemes`. See plugin docs for exact XML.
-   - Set iOS minimum to 12.0 in `ios/Podfile` and Xcode project.
-
-5) Web configuration (optional)
-   - `main.dart` initializes the SDK on web using `FacebookAuth.i.webAndDesktopInitialize()` with your `AppSecrets.facebookAppId`.
-   - Use HTTPS for live; localhost is allowed for testing but may show console warnings.
-
-6) Usage
-   - In the Sign In screen, tap "Continue with Facebook". On success you'll be redirected to the main screen.
-
-Docs: https://pub.dev/packages/flutter_facebook_auth and https://facebook.meedu.app/docs/7.x.x/intro
+## 9) Facebook Login (tuỳ chọn)
+Ứng dụng còn phần tích hợp Facebook Login (plugin `flutter_facebook_auth`). Nếu dùng, cấu hình App ID/Client Token theo tài liệu plugin.

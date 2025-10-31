@@ -1,4 +1,5 @@
 import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/controllers/theme_controller.dart';
 import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/controllers/wishlist_controller.dart';
@@ -14,10 +15,9 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'utils/app_secrets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:store_app/services/firestore_service.dart';
-import 'package:store_app/view/admin_dashboard_screen.dart';
+import 'package:store_app/view/admin_dashboard_api_screen.dart';
+import 'package:store_app/view/admin_account_screen.dart';
 import 'firebase_options.dart';
-
-// ...
 
 
 Future<void> main() async {
@@ -26,6 +26,7 @@ Future<void> main() async {
 
   Get.put(ThemeController());
   Get.put(LanguageController());
+  Get.put(ApiAuthController());
   Get.put(AuthController());
   Get.put(NavigationController());
   Get.put(WishlistController()); // ✅ Controller này cần sớm có mặt
@@ -92,7 +93,8 @@ class MyApp extends StatelessWidget {
       themeMode: themeController.theme,
       defaultTransition: Transition.fade,
       getPages: [
-        GetPage(name: '/admin', page: () => const AdminDashboardScreen()),
+  GetPage(name: '/admin', page: () => const AdminDashboardApiScreen()),
+  GetPage(name: '/admin-account', page: () => const AdminAccountScreen()),
       ],
       home: SplashScreen(),
     );

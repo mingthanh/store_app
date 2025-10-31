@@ -1,5 +1,5 @@
 import 'package:store_app/view/main_screen.dart';
-import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +140,7 @@ class SignUpScreen extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (!_formKey.currentState!.validate()) return;
-                      final auth = Get.find<AuthController>();
+                      final auth = Get.find<ApiAuthController>();
                       Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
                       final ok = await auth.signUpWithEmail(
                         _nameController.text.trim(),
@@ -149,13 +149,16 @@ class SignUpScreen extends StatelessWidget {
                       );
                       Get.back();
                       if (ok) {
-                        if (auth.role.value == 'admin') {
+                        if (auth.isAdmin) {
                           Get.offAllNamed('/admin');
                         } else {
                           Get.offAll(() => const MainScreen());
                         }
                       } else {
-                        Get.snackbar('Sign up failed', 'Please try again', snackPosition: SnackPosition.BOTTOM);
+                        final msg = auth.lastError.value.isNotEmpty
+                            ? auth.lastError.value
+                            : 'Please try again';
+                        Get.snackbar('Sign up failed', msg, snackPosition: SnackPosition.BOTTOM);
                       }
                     },
                     style: ElevatedButton.styleFrom(

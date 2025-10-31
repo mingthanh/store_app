@@ -55,10 +55,15 @@ class ProductCard extends StatelessWidget {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(12),
                   ),
-                  child: Image.asset(
-                    product.imageUrl,
-                    fit: BoxFit.cover,
-                  ),
+                  child: (product.imageUrl.startsWith('http://') || product.imageUrl.startsWith('https://'))
+                      ? Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          product.imageUrl,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
 

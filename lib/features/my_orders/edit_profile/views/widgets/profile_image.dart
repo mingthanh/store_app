@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:store_app/repositories/upload_repository.dart';
 
 class ProfileImage extends StatelessWidget {
   const ProfileImage({super.key});
@@ -8,6 +11,15 @@ class ProfileImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final auth = Get.find<ApiAuthController>();
+  final avatar = auth.avatarUrl.value.trim(); // URL ảnh đại diện hiện tại (có thể rỗng)
+    ImageProvider imageProvider;
+    if (avatar.isNotEmpty && (avatar.startsWith('http://') || avatar.startsWith('https://'))) {
+      imageProvider = NetworkImage(avatar);
+    } else {
+      imageProvider = const AssetImage('assets/images/avatar.jpg');
+    }
 
     return Center(
       child: Stack(
@@ -21,12 +33,13 @@ class ProfileImage extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
                 width: 2,
               ),
-              image: const DecorationImage(image: AssetImage('assets/images/avatar.jpg'),
-              fit: BoxFit.cover,
-
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
               )
             ),
           ),
+          // Nút máy ảnh nhỏ overlay để mở bottom sheet chọn nguồn ảnh
           Positioned(
             bottom: 0,
             right: 0,
@@ -59,6 +72,7 @@ class ProfileImage extends StatelessWidget {
       ),
     );
   }
+  // Hiện bottom sheet cho các lựa chọn đổi avatar: chụp ảnh (để sau), chọn từ gallery, dán URL
   void _showImagePickerBottomSheet(BuildContext context, bool isDark) {
     Get.bottomSheet(
       Container(
@@ -107,10 +121,51 @@ class ProfileImage extends StatelessWidget {
               context,
               'choose_from_gallery'.tr,
               Icons.photo_library_outlined,
-              () => Get.back(),
+              () async {
+                Get.back();
+                try {
+                  final res = await FilePicker.platform.pickFiles(type: FileType.image, withData: true);
+                  if (res != null && res.files.isNotEmpty) {
+                    final file = res.files.single;
+                    final bytes = file.bytes;
+                    if (bytes != null) {
+                      final auth = Get.find<ApiAuthController>();
+                      final url = await UploadRepository.instance.uploadImageBytes(auth.token.value!, bytes, file.name);
+                      final ok = await auth.updateProfile(newAvatarUrl: url);
+                      if (ok) Get.snackbar('Profile', 'Avatar updated', snackPosition: SnackPosition.BOTTOM);
+                    }
+                  }
+                } catch (e) {
+                  Get.snackbar('Upload failed', e.toString(), snackPosition: SnackPosition.BOTTOM);
+                }
+              },
               isDark,
             ),
             const SizedBox(height: 16),
+            // Cho phép dán URL ảnh trực tiếp và cập nhật ngay
+            _buildOptionTile(
+              context,
+              'Paste image URL',
+              Icons.link_outlined,
+              () async {
+                Get.back();
+                final ctrl = TextEditingController();
+                final urlOk = await Get.dialog<bool>(AlertDialog(
+                  title: const Text('Set avatar by URL'),
+                  content: TextField(controller: ctrl, decoration: const InputDecoration(labelText: 'Image URL (http/https)')),
+                  actions: [
+                    TextButton(onPressed: () => Get.back(result: false), child: const Text('Cancel')),
+                    ElevatedButton(onPressed: () => Get.back(result: true), child: const Text('Set')),
+                  ],
+                ));
+                if (urlOk == true && ctrl.text.trim().isNotEmpty) {
+                  final auth = Get.find<ApiAuthController>();
+                  final ok = await auth.updateProfile(newAvatarUrl: ctrl.text.trim());
+                  if (ok) Get.snackbar('Profile', 'Avatar updated', snackPosition: SnackPosition.BOTTOM);
+                }
+              },
+              isDark,
+            ),
 
           ],
         ),

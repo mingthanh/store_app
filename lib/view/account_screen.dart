@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:store_app/controllers/auth_controller.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/features/profile/edit_profile/views/screens/edit_profile_screen.dart';
-import 'package:store_app/features/orders/view/screen/my_order_screen.dart';
 import 'package:store_app/shipping_address/shipping_address_screen.dart';
+import 'package:store_app/view/my_orders_api_screen.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/view/settings_screen.dart';
 import 'package:store_app/view/signin_screen.dart';
@@ -47,6 +47,7 @@ class AccountScreen extends StatelessWidget {
 
   Widget _buildProfileSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final apiAuth = Get.find<ApiAuthController>();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -58,26 +59,35 @@ class AccountScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const CircleAvatar(
-            radius: 50,
-            backgroundImage: AssetImage('assets/images/avatar.jpg'),
-          ),
+          Obx(() {
+            final avatar = apiAuth.avatarUrl.value.trim();
+            ImageProvider imageProvider;
+            if (avatar.isNotEmpty && (avatar.startsWith('http://') || avatar.startsWith('https://'))) {
+              imageProvider = NetworkImage(avatar);
+            } else {
+              imageProvider = const AssetImage('assets/images/avatar.jpg');
+            }
+            return CircleAvatar(
+              radius: 50,
+              backgroundImage: imageProvider,
+            );
+          }),
           const SizedBox(height: 16),
-          Text(
-            'Quái vật hồ Lockness',
+          Obx(() => Text(
+            apiAuth.name.value.isNotEmpty ? apiAuth.name.value : 'Guest',
             style: AppTextStyles.withColor(
               AppTextStyles.h2,
               Theme.of(context).textTheme.bodyLarge!.color!,
             ),
-          ),
+          )),
           const SizedBox(height: 4),
-          Text(
-            'trankimthanh230@gmail.com',
+          Obx(() => Text(
+            apiAuth.email.value.isNotEmpty ? apiAuth.email.value : 'Not signed in',
             style: AppTextStyles.withColor(
               AppTextStyles.bodyMedium,
               isDark ? Colors.grey[400]! : Colors.grey[600]!,
             ),
-          ),
+          )),
           const SizedBox(height: 16),
           OutlinedButton(
             onPressed: () => Get.to(() => EditProfileScreen()),
@@ -152,7 +162,7 @@ class AccountScreen extends StatelessWidget {
                 if (key == 'logout') {
                   _showLogoutDialog(context);
                 } else if (key == 'my_orders') {
-                  Get.to(() => MyOrderScreen());
+                  Get.to(() => const MyOrdersApiScreen());
                 } else if (key == 'shipping_address') {
                   Get.to(() => ShippingAddressScreen());
                 } else if (key == 'help_center') {
@@ -168,6 +178,7 @@ class AccountScreen extends StatelessWidget {
 
   void _showLogoutDialog(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final apiAuth = Get.find<ApiAuthController>();
 
     Get.dialog(
       AlertDialog(
@@ -229,9 +240,8 @@ class AccountScreen extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                    final AuthController authController = Get.find<AuthController>();
-                    authController.logout();
-                    Get.offAll(() => SigninScreen());
+                      apiAuth.signOut();
+                      Get.offAll(() => SigninScreen());
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

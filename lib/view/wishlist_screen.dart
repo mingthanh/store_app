@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/wishlist_controller.dart';
 import 'package:store_app/models/product.dart';
+import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -108,7 +109,15 @@ class WishlistScreen extends StatelessWidget {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 160),
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                final cart = Get.put(CartController(), permanent: true);
+                final controller = Get.find<WishlistController>();
+                for (final p in controller.wishlist) {
+                  cart.add(p, qty: 1);
+                }
+                controller.clearWishlist();
+                Get.snackbar('Added', 'All wishlist items moved to cart', snackPosition: SnackPosition.BOTTOM);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 padding:
@@ -156,12 +165,19 @@ class WishlistScreen extends StatelessWidget {
             borderRadius: const BorderRadius.horizontal(
               left: Radius.circular(12),
             ),
-            child: Image.asset(
-              product.imageUrl,
-              width: 120,
-              height: 120,
-              fit: BoxFit.cover,
-            ),
+            child: (product.imageUrl.startsWith('http://') || product.imageUrl.startsWith('https://'))
+                ? Image.network(
+                    product.imageUrl,
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    product.imageUrl,
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                  ),
           ),
           Expanded(
             child: Padding(
@@ -202,7 +218,13 @@ class WishlistScreen extends StatelessWidget {
                       Row(
                         children: [
                           IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              final cart = Get.put(CartController(), permanent: true);
+                              cart.add(product, qty: 1);
+                              // remove from wishlist after adding
+                              Get.find<WishlistController>().toggleFavorite(product);
+                              Get.snackbar('Added to cart', product.name, snackPosition: SnackPosition.BOTTOM);
+                            },
                             icon: const Icon(Icons.shopping_cart_outlined),
                             color: Theme.of(context).primaryColor,
                           ),

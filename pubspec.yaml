@@ -44,6 +44,8 @@ dependencies:
   # Align with firebase_core ^4.x; upgrade to plugin version compatible with core 4
   firebase_auth: ^6.1.1
   url_launcher: ^6.3.0
+  http: ^1.2.2
+  file_picker: ^8.1.2
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +61,6 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter packages.
 flutter:
 
   # The following line ensures that the Material Icons font is

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/theme_controller.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/view/all_products_screen.dart';
 import 'package:store_app/view/cart_screen.dart';
 import 'package:store_app/view/notifications_screen.dart';
@@ -25,21 +26,35 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundImage: AssetImage('assets/images/avatar.jpg'),
-                  ),
+                  Obx(() {
+                    final auth = Get.find<ApiAuthController>();
+                    final avatar = auth.avatarUrl.value.trim();
+                    ImageProvider imageProvider;
+                    if (avatar.isNotEmpty && (avatar.startsWith('http://') || avatar.startsWith('https://'))) {
+                      imageProvider = NetworkImage(avatar);
+                    } else {
+                      imageProvider = const AssetImage('assets/images/avatar.jpg');
+                    }
+                    return CircleAvatar(
+                      radius: 20,
+                      backgroundImage: imageProvider,
+                    );
+                  }),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          'Hello, Quái Vật Hồ Lockness!',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: Colors.grey, fontSize: 14),
-                        ),
-                        Text(
+                      children: [
+                        Obx(() {
+                          final auth = Get.find<ApiAuthController>();
+                          final greetingName = auth.name.value.isNotEmpty ? auth.name.value : 'Guest';
+                          return Text(
+                            'Hello, $greetingName!',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(color: Colors.grey, fontSize: 14),
+                          );
+                        }),
+                        const Text(
                           'Hope you’re having a great day!',
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -115,9 +130,9 @@ class HomeScreen extends StatelessWidget {
                 ),
             ),
 
-            // products grid
+            // products grid (from API)
             const Expanded(
-              child: ProductGrid(useLocal: true),
+              child: ProductGrid(useApi: true),
             ),
           ],
         ),

@@ -2,10 +2,38 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/features/my_orders/edit_profile/views/widgets/profile_image.dart';
 import 'package:store_app/features/my_orders/edit_profile/views/widgets/profile_form.dart';
+import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
-class EditProfileScreen extends StatelessWidget {
+class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _emailCtrl;
+  final _auth = Get.find<ApiAuthController>();
+  bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: _auth.name.value);
+    _phoneCtrl = TextEditingController(text: _auth.phone.value);
+    _emailCtrl = TextEditingController(text: _auth.email.value);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +59,11 @@ class EditProfileScreen extends StatelessWidget {
             const SizedBox(height: 24),
             const ProfileImage(),
             const SizedBox(height: 24),
-            const ProfileForm(),
+            ProfileForm(
+              nameController: _nameCtrl,
+              phoneController: _phoneCtrl,
+              emailController: _emailCtrl,
+            ),
             const SizedBox(height: 24),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -61,13 +93,34 @@ class EditProfileScreen extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        Get.snackbar(
-                          'edit_profile'.tr,
-                          'profile_updated'.tr,
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
+                      onPressed: _saving
+                          ? null
+                          : () async {
+                              setState(() => _saving = true);
+                              final ok = await _auth.updateProfile(
+                                newName: _nameCtrl.text.trim(),
+                                newPhone: _phoneCtrl.text.trim(),
+                              );
+                              setState(() => _saving = false);
+                              if (ok) {
+                                Get.back();
+                                Get.snackbar(
+                                  'edit_profile'.tr,
+                                  'profile_updated'.tr,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                              } else {
+                                Get.snackbar(
+                                  'edit_profile'.tr,
+                                  _auth.lastError.value.isNotEmpty
+                                      ? _auth.lastError.value
+                                      : 'Update failed',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+                                );
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         elevation: 0,
@@ -77,7 +130,7 @@ class EditProfileScreen extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        'save'.tr,
+                        _saving ? 'saving'.tr : 'save'.tr,
                         style: AppTextStyles.withColor(
                           AppTextStyles.buttonMedium,
                           Colors.white,

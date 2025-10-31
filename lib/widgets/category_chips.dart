@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class CategoryChips extends StatefulWidget {
-  const CategoryChips({super.key});
+  // selectedIndex và onChanged cho phép cha điều khiển (controlled widget).
+  // Nếu không truyền, widget sẽ tự quản lý trạng thái bên trong như trước đây.
+  final int? selectedIndex; // chỉ mục chip đang chọn (0 = All)
+  final ValueChanged<int>? onChanged; // callback khi người dùng chọn chip khác
+
+  const CategoryChips({super.key, this.selectedIndex, this.onChanged});
 
   @override
   State<CategoryChips> createState() => _CategoryChipsState();
 }
 
 class _CategoryChipsState extends State<CategoryChips> {
-  int selectedIndex = 0;
+  int selectedIndex = 0; // trạng thái nội bộ khi cha không điều khiển
 
   final categories = [
     'All',
@@ -17,6 +22,23 @@ class _CategoryChipsState extends State<CategoryChips> {
     'Women',
     'Girls',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.selectedIndex != null) {
+      selectedIndex = widget.selectedIndex!;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant CategoryChips oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Nếu cha điều khiển và giá trị thay đổi thì cập nhật UI
+    if (widget.selectedIndex != null && widget.selectedIndex != selectedIndex) {
+      setState(() => selectedIndex = widget.selectedIndex!);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +74,13 @@ class _CategoryChipsState extends State<CategoryChips> {
                 ),
                 selected: selectedIndex == index,
                 onSelected: (bool selected) {
-                  setState(() {
-                    selectedIndex = selected ? index : selectedIndex;
-                  });
+                  if (!selected) return; // chỉ xử lý khi chọn
+                  // Nếu có callback từ cha, gọi callback.
+                  widget.onChanged?.call(index);
+                  // Khi cha không điều khiển, tự setState nội bộ.
+                  if (widget.selectedIndex == null) {
+                    setState(() => selectedIndex = index);
+                  }
                 },
                 selectedColor: Theme.of(context).colorScheme.primary,
                 backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],

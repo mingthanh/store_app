@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:store_app/services/firestore_service.dart';
+import 'package:store_app/repositories/product_repository.dart';
 import 'package:store_app/models/product.dart' as model;
 import 'package:store_app/view/product_details_screen.dart';
 import 'package:store_app/widgets/product_card.dart';
@@ -10,6 +11,8 @@ class ProductGrid extends StatelessWidget {
   final int limit;
   // Nếu true thì dùng danh sách local `products` trong `lib/models/product.dart`
   final bool useLocal;
+  // Dùng API (MongoDB backend)
+  final bool useApi;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
 
@@ -20,6 +23,7 @@ class ProductGrid extends StatelessWidget {
     this.shrinkWrap = false,
     this.physics,
     this.useLocal = false,
+    this.useApi = false,
   });
 
   @override
@@ -47,6 +51,66 @@ class ProductGrid extends StatelessWidget {
               Get.to(() => ProductDetailsScreen(product: p));
             },
             child: ProductCard(product: p),
+          );
+        },
+      );
+    }
+
+    // Nếu dùng API (Mongo backend)
+    if (useApi) {
+      return FutureBuilder<List<Map<String, dynamic>>>(
+        future: ProductRepository.instance.fetchProducts(category: category, limit: limit),
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snap.hasError) {
+            return Center(child: Text('Lỗi tải sản phẩm: ${snap.error}'));
+          }
+          final items = snap.data ?? const [];
+          if (items.isEmpty) {
+            return const Center(child: Text('Chưa có sản phẩm'));
+          }
+          return GridView.builder(
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 0.72,
+            ),
+            shrinkWrap: shrinkWrap,
+            physics: physics ?? (shrinkWrap ? const NeverScrollableScrollPhysics() : null),
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final p = items[index];
+              final name = (p['name'] ?? '').toString();
+              final rawPrice = p['price'];
+              final price = (rawPrice is num) ? rawPrice.toInt() : int.tryParse(rawPrice?.toString() ?? '') ?? 0;
+              final imageUrl = (p['imageUrl'] ?? '').toString();
+              final mongoId = (p['_id'] ?? '').toString();
+              final generatedId = mongoId.isNotEmpty ? mongoId.hashCode : (index + 1);
+
+              return GestureDetector(
+                onTap: () {
+                  final product = model.Product(
+                    id: generatedId,
+                    name: name,
+                    price: price.toDouble(),
+                    imageUrl: imageUrl.isEmpty ? 'assets/images/shoe.jpg' : imageUrl,
+                    category: (p['category'] ?? '').toString(),
+                    description: (p['description'] ?? '').toString(),
+                    isFavorite: false,
+                  );
+                  Get.to(() => ProductDetailsScreen(product: product));
+                },
+                child: _ProductCard(
+                  name: name,
+                  price: price,
+                  imageUrl: imageUrl,
+                ),
+              );
+            },
           );
         },
       );
@@ -162,12 +226,10 @@ class _ProductCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AspectRatio(
-            aspectRatio: 1,
+          // Use Expanded instead of AspectRatio to avoid fractional overflow
+          Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: imageUrl == null || imageUrl!.isEmpty
                   ? Container(
                       color: Colors.grey.shade200,

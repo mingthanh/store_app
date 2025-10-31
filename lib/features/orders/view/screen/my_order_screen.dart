@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:store_app/features/orders/model/order.dart';
 import 'package:store_app/features/orders/repository/order_repository.dart';
 import 'package:store_app/features/orders/view/widget/order_card.dart';
+import 'package:store_app/features/orders/view/screen/order_details_screen.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class MyOrderScreen extends StatelessWidget {
@@ -58,7 +59,7 @@ class MyOrderScreen extends StatelessWidget {
       itemBuilder: (context, index) => Ordercard(
         order: order[index],
         onViewDetails: (){
-          // Navigate to order details screen
+          Get.to(() => OrderDetailsScreen(order: order[index]));
         },
       ),
     );
