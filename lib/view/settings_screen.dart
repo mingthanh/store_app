@@ -5,6 +5,7 @@ import 'package:store_app/controllers/language_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:store_app/view/terms_of_service_screen.dart';
+import 'package:store_app/view/privacy_policy_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -76,6 +77,7 @@ class SettingsScreen extends StatelessWidget {
                   'privacy_policy'.tr,
                   'privacy_policy_desc'.tr,
                   Icons.privacy_tip_outlined,
+                  onTap: () => Get.to(() => const PrivacyPolicyScreen()),
                 ),
                 _buildNavigationTile(
                   context,

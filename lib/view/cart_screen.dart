@@ -5,7 +5,6 @@ import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/repositories/order_api_repository.dart';
-// VNPay flow removed; using VietQR QuickLink only
 import 'package:store_app/view/qr_payment_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -358,11 +357,12 @@ class CartScreen extends StatelessWidget {
                   'price': e.product.price,
                   'quantity': e.quantity,
                 }).toList();
-                final total = cart.totalPrice; // UI đang là đơn vị tiền tệ hiển thị (thường USD demo)
-                // Quy đổi sang VND: giả sử giá hiển thị là USD, tỷ giá ~24,500
-                // TODO: Nên lấy tỷ giá từ API hoặc config thay vì hardcode
+                final total = cart.totalPrice;
+                // Convert to VND: assume price is in USD if < 1000
                 const usdToVndRate = 24500.0;
-                final amountVnd = (total < 1000 ? (total * usdToVndRate) : total).round();
+                final amountVnd = (total < 1000 
+                    ? (total * usdToVndRate) 
+                    : total).round();
                 try {
                   bool paid = false;
                   final orderId = 'qr-${DateTime.now().millisecondsSinceEpoch}';
@@ -394,55 +394,56 @@ class CartScreen extends StatelessWidget {
                       
                       // Hiển thị dialog thành công với animation
                       await Get.dialog(
-                        AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          contentPadding: const EdgeInsets.all(24),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withAlpha((0.1 * 255).round()),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check_circle_outline,
-                                  color: Colors.green,
-                                  size: 48,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              Text(
-                                'Đặt hàng thành công!',
-                                style: AppTextStyles.withColor(
-                                  AppTextStyles.h3,
-                                  Theme.of(context).textTheme.bodyLarge!.color!,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Đơn hàng của bạn đã được tạo và đang được xử lý.',
-                                textAlign: TextAlign.center,
-                                style: AppTextStyles.withColor(
-                                  AppTextStyles.bodyMedium,
-                                  Colors.grey[600]!,
-                                ),
-                              ),
-                              const SizedBox(height: 24),
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton(
-                                  onPressed: () => Get.back(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Theme.of(context).primaryColor,
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                        Builder(
+                          builder: (dialogContext) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            contentPadding: const EdgeInsets.all(24),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withAlpha((0.1 * 255).round()),
+                                    shape: BoxShape.circle,
                                   ),
+                                  child: const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Colors.green,
+                                    size: 48,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  'Đặt hàng thành công!',
+                                  style: AppTextStyles.withColor(
+                                    AppTextStyles.h3,
+                                    Theme.of(dialogContext).textTheme.bodyLarge!.color!,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Đơn hàng của bạn đã được tạo và đang được xử lý.',
+                                  textAlign: TextAlign.center,
+                                  style: AppTextStyles.withColor(
+                                    AppTextStyles.bodyMedium,
+                                    Colors.grey[600]!,
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () => Get.back(),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Theme.of(dialogContext).primaryColor,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
                                   child: Text(
                                     'Xem đơn hàng của tôi',
                                     style: AppTextStyles.withColor(
@@ -455,6 +456,7 @@ class CartScreen extends StatelessWidget {
                             ],
                           ),
                         ),
+                      ),
                       );
                       
                       // Điều hướng đến My Orders (tab Account -> My Orders)

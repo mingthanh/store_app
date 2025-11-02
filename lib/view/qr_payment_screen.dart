@@ -60,24 +60,26 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
         Get.back(result: false);
         return;
       }
-      print('[QR Payment] Polling status for orderId: ${widget.orderId}');
       final st = await PaymentQrRepository.instance.status(widget.orderId);
-      print('[QR Payment] Status response: $st');
       if (st['status'] == 'paid') {
         _timer?.cancel();
-        print('[QR Payment] Payment detected as PAID!');
         
-        // Hiển thị dialog thay vì snackbar để dễ thấy
+        // Show success dialog
         if (mounted) {
           await showDialog(
             context: context,
             barrierDismissible: false,
             builder: (ctx) => AlertDialog(
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 32),
-                  SizedBox(width: 8),
-                  Text('Thanh toán thành công'),
+                  const Icon(Icons.check_circle, color: Colors.green, size: 32),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Thanh toán thành công',
+                      style: Theme.of(ctx).textTheme.titleLarge,
+                    ),
+                  ),
                 ],
               ),
               content: const Text('Chuyển khoản đã được xác nhận!\nĐang tạo đơn hàng...'),
@@ -91,13 +93,13 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
           );
         }
         
-        print('[QR Payment] Dialog closed, navigating back...');
+        // Navigate back with success result
         if (mounted) {
           Navigator.of(context).pop(true);
         }
       }
     } catch (e) {
-      print('[QR Payment] Poll error: $e');
+      // Silently ignore polling errors to avoid spam
     }
   }
 
@@ -141,7 +143,16 @@ class _QrPaymentScreenState extends State<QrPaymentScreen> {
                       ),
                     ),
                   const SizedBox(height: 8),
-                  Text('Nội dung chuyển khoản: ORDER-${widget.orderId}'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'Nội dung chuyển khoản: ORDER-${widget.orderId}',
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
                 ],
               ),
       ),

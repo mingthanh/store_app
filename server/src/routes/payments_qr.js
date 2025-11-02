@@ -105,17 +105,24 @@ router.post('/webhook', express.json({ type: '*/*' }), (req, res) => {
   const body = req.body || {};
   const secret = process.env.QR_WEBHOOK_SECRET || '';
 
-  console.log('[Webhook] RAW BODY:', JSON.stringify(body, null, 2));
-  console.log('[Webhook] Headers:', JSON.stringify(req.headers, null, 2));
+  // Debug logging (can be disabled in production by setting DEBUG=false)
+  const debug = (process.env.DEBUG || 'true').toLowerCase() === 'true';
+  if (debug) {
+    console.log('[Webhook] Received webhook:', { 
+      amount: body.data?.amount || body.amount,
+      description: body.data?.description || body.description 
+    });
+  }
 
   const mock = (process.env.MOCK_QR_WEBHOOK || 'false').toLowerCase() === 'true';
   
-  // Casso không sử dụng HMAC signature, skip verification
+  // Note: Casso/PayOS webhook signature verification disabled
+  // Enable if using services that support HMAC signature
   // if (!mock && secret) {
   //   const raw = JSON.stringify(body);
   //   if (!hmacOk(req, raw, secret)) {
   //     console.log('[Webhook] Invalid signature');
-  //     return res.status(401).json({ ok: false, error: 'bad signature' });
+  //     return res.status(401).json({ error: 1, message: 'Invalid signature' });
   //   }
   // }
 
