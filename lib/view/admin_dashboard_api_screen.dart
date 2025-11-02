@@ -31,6 +31,10 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    // Ensure FAB visibility updates when switching tabs
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
     _load();
   }
 
@@ -181,9 +185,29 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
         ),
       );
 
+  /// Safely get token, show error if not available
+  String? _getTokenSafely() {
+    final token = auth.token.value;
+    if (token == null || token.isEmpty) {
+      if (auth.isSocialLogin.value) {
+        Get.snackbar(
+          'Admin Access Limited',
+          'Some admin features require email/password login. Please create an admin account with email and password.',
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 4),
+        );
+      } else {
+        Get.snackbar('Authentication Error', 'Please sign in again');
+      }
+      return null;
+    }
+    return token;
+  }
+
   Future<void> _load() async {
     // Tải thống kê + danh sách sản phẩm/đơn hàng/người dùng cho dashboard
-    final t = auth.token.value;
+    final t = _getTokenSafely();
     if (t == null || !auth.isAdmin) {
       Get.snackbar('Access denied', 'Admin only');
       Get.back();
@@ -210,7 +234,8 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
   Future<void> _loadOrders() async {
     // Chỉ refresh tab Orders để giảm tải
     try {
-      final t = auth.token.value!;
+      final t = _getTokenSafely();
+      if (t == null) return;
       final o = await OrderApiRepository.instance.allOrders(t);
       setState(() => orders = o.cast<Map<String, dynamic>>());
     } catch (e) {
@@ -221,7 +246,8 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
   Future<void> _loadUsers() async {
     // Chỉ refresh tab Users
     try {
-      final t = auth.token.value!;
+      final t = _getTokenSafely();
+      if (t == null) return;
       final u = await UserRepository.instance.fetchUsers(t);
       setState(() => users = u.cast<Map<String, dynamic>>());
     } catch (e) {
@@ -234,7 +260,17 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
     final nameCtrl = TextEditingController(text: existing?['name']?.toString());
     final priceCtrl = TextEditingController(text: existing?['price']?.toString());
     final imgCtrl = TextEditingController(text: existing?['imageUrl']?.toString());
-    final catCtrl = TextEditingController(text: existing?['category']?.toString() ?? 'Shoes');
+    final catCtrl = TextEditingController(text: existing?['category']?.toString() ?? 'Men');
+    // Multi-category support: Men/Women/Girls
+    final options = const ['Men','Women','Girls'];
+    final Set<String> selectedCats = {
+      ...((existing?['categories'] is List)
+          ? (existing!['categories'] as List).map((e) => e.toString())
+          : <String>[]),
+    };
+    if (selectedCats.isEmpty && (existing?['category'] is String)) {
+      selectedCats.add(existing!['category'].toString());
+    }
     final descCtrl = TextEditingController(text: existing?['description']?.toString());
 
     final ok = await showDialog<bool>(
@@ -267,8 +303,10 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
                           final file = res.files.single;
                           final bytes = file.bytes;
                           if (bytes != null) {
+                            final token = _getTokenSafely();
+                            if (token == null) return;
                             final url = await UploadRepository.instance.uploadImageBytes(
-                              auth.token.value!, bytes, file.name,
+                              token, bytes, file.name,
                             );
                             imgCtrl.text = url;
                           }
@@ -284,7 +322,31 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
                   ),
                 ],
               ),
-              TextField(controller: catCtrl, decoration: const InputDecoration(labelText: 'Category')),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Categories', style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: options.map((c) => FilterChip(
+                  label: Text(c),
+                  selected: selectedCats.contains(c),
+                  onSelected: (sel) {
+                    setStateDialog(() {
+                      if (sel) {
+                        selectedCats.add(c);
+                      } else {
+                        selectedCats.remove(c);
+                      }
+                      // Keep a primary category text (first selected) for backward compat
+                      catCtrl.text = selectedCats.isEmpty ? '' : selectedCats.first;
+                    });
+                  },
+                )).toList(),
+              ),
               TextField(controller: descCtrl, decoration: const InputDecoration(labelText: 'Description')),
             ],
           ),
@@ -303,11 +365,13 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
       'name': nameCtrl.text.trim(),
       'price': int.tryParse(priceCtrl.text.trim()) ?? 0,
       'imageUrl': imgCtrl.text.trim(),
-      'category': catCtrl.text.trim(),
+      'category': (selectedCats.isNotEmpty ? selectedCats.first : 'Men'),
+      'categories': selectedCats.toList(),
       'description': descCtrl.text.trim(),
     };
     try {
-      final t = auth.token.value!;
+      final t = _getTokenSafely();
+      if (t == null) return;
       if (existing == null) {
         await AdminRepository.instance.createProduct(t, body); // Tạo mới
       } else {
@@ -335,7 +399,8 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
     );
     if (confirm != true) return;
     try {
-      final t = auth.token.value!;
+      final t = _getTokenSafely();
+      if (t == null) return;
       await AdminRepository.instance
           .deleteProduct(t, product['_id']?.toString() ?? '');
       await _load();
@@ -348,7 +413,8 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
       Map<String, dynamic> order, String status) async {
     // Admin đổi trạng thái đơn rồi refresh danh sách
     try {
-      final t = auth.token.value!;
+      final t = _getTokenSafely();
+      if (t == null) return;
       await OrderApiRepository.instance
           .updateStatus(t, order['_id'].toString(), status);
       await _loadOrders();
@@ -388,7 +454,8 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
     );
     if (ok == true) {
       try {
-        final t = auth.token.value!;
+        final t = _getTokenSafely();
+        if (t == null) return;
         await UserRepository.instance.updateUser(t, user['_id'].toString(),
             name: nameCtrl.text.trim(), role: role);
         await _loadUsers();

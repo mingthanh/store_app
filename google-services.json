@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "262793312227-r7ms68lgu4t334s6a2tvcs4b8rene334.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.doanmonhocapp",
-            "certificate_hash": "7c9a5170b1b015adbc7c63b8491a83dd20ec8dee"
-          }
-        },
-        {
           "client_id": "262793312227-7c2v84oqlueieqeobq276jclhi1o2tvm.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -5,6 +5,7 @@ import 'package:store_app/repositories/product_repository.dart';
 import 'package:store_app/models/product.dart' as model;
 import 'package:store_app/view/product_details_screen.dart';
 import 'package:store_app/widgets/product_card.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProductGrid extends StatelessWidget {
   final String? category;
@@ -62,7 +63,7 @@ class ProductGrid extends StatelessWidget {
         future: ProductRepository.instance.fetchProducts(category: category, limit: limit),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const _ShimmerGrid();
           }
           if (snap.hasError) {
             return Center(child: Text('Lỗi tải sản phẩm: ${snap.error}'));
@@ -91,24 +92,18 @@ class ProductGrid extends StatelessWidget {
               final mongoId = (p['_id'] ?? '').toString();
               final generatedId = mongoId.isNotEmpty ? mongoId.hashCode : (index + 1);
 
+              final product = model.Product(
+                id: generatedId,
+                name: name,
+                price: price.toDouble(),
+                imageUrl: imageUrl.isEmpty ? 'assets/images/shoe.jpg' : imageUrl,
+                category: (p['category'] ?? '').toString(),
+                description: (p['description'] ?? '').toString(),
+                isFavorite: false,
+              );
               return GestureDetector(
-                onTap: () {
-                  final product = model.Product(
-                    id: generatedId,
-                    name: name,
-                    price: price.toDouble(),
-                    imageUrl: imageUrl.isEmpty ? 'assets/images/shoe.jpg' : imageUrl,
-                    category: (p['category'] ?? '').toString(),
-                    description: (p['description'] ?? '').toString(),
-                    isFavorite: false,
-                  );
-                  Get.to(() => ProductDetailsScreen(product: product));
-                },
-                child: _ProductCard(
-                  name: name,
-                  price: price,
-                  imageUrl: imageUrl,
-                ),
+                onTap: () => Get.to(() => ProductDetailsScreen(product: product)),
+                child: ProductCard(product: product),
               );
             },
           );
@@ -124,7 +119,7 @@ class ProductGrid extends StatelessWidget {
       ),
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const _ShimmerGrid();
         }
         if (snap.hasError) {
           return Center(child: Text('Lỗi tải sản phẩm: ${snap.error}'));
@@ -186,14 +181,8 @@ class ProductGrid extends StatelessWidget {
             );
 
             return GestureDetector(
-              onTap: () {
-                Get.to(() => ProductDetailsScreen(product: product));
-              },
-              child: _ProductCard(
-                name: name,
-                price: price.toInt(),
-                imageUrl: imageUrl,
-              ),
+              onTap: () => Get.to(() => ProductDetailsScreen(product: product)),
+              child: ProductCard(product: product),
             );
           },
         );
@@ -202,83 +191,34 @@ class ProductGrid extends StatelessWidget {
   }
 }
 
-class _ProductCard extends StatelessWidget {
-  final String name;
-  final int price;
-  final String? imageUrl;
+// _ProductCard removed in favor of ProductCard (which includes wishlist button)
 
-  const _ProductCard({required this.name, required this.price, this.imageUrl});
+class _ShimmerGrid extends StatelessWidget {
+  const _ShimmerGrid();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha((0.05 * 255).round()),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 0.72,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Use Expanded instead of AspectRatio to avoid fractional overflow
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: imageUrl == null || imageUrl!.isEmpty
-                  ? Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.image, size: 40),
-                    )
-                  : Image.network(
-                      imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.broken_image),
-                      ),
-                    ),
+      itemCount: 6,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  _formatVnd(price),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
-  }
-
-  String _formatVnd(int p) {
-    final s = p.toString();
-    final buffer = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      final idx = s.length - i;
-      buffer.write(s[i]);
-      if (idx > 1 && idx % 3 == 1) buffer.write('.');
-    }
-    return '${buffer.toString()} đ';
   }
 }

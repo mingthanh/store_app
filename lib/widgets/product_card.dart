@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 import 'package:store_app/controllers/wishlist_controller.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/utils/format.dart';
 
 // 🧮 Hàm tính phần trăm giảm giá
 double calculateDiscount(double price, double oldPrice) {
@@ -56,9 +59,15 @@ class ProductCard extends StatelessWidget {
                     top: Radius.circular(12),
                   ),
                   child: (product.imageUrl.startsWith('http://') || product.imageUrl.startsWith('https://'))
-                      ? Image.network(
-                          product.imageUrl,
+                      ? CachedNetworkImage(
+                          imageUrl: product.imageUrl,
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Shimmer.fromColors(
+                                baseColor: Colors.grey.shade300,
+                                highlightColor: Colors.grey.shade100,
+                                child: Container(color: Colors.grey.shade300),
+                              ),
+                          errorWidget: (context, url, error) => const Icon(Icons.broken_image),
                         )
                       : Image.asset(
                           product.imageUrl,
@@ -150,7 +159,7 @@ class ProductCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '\$${product.price.toStringAsFixed(2)}',
+                      formatCurrencyVND(product.price),
                       style: AppTextStyles.withColor(
                         AppTextStyles.withWeight(
                           AppTextStyles.bodyLarge,
@@ -162,7 +171,7 @@ class ProductCard extends StatelessWidget {
                     if (product.oldPrice != null) ...[
                       const SizedBox(width: 8),
                       Text(
-                        '\$${product.oldPrice!.toStringAsFixed(2)}',
+                        formatCurrencyVND(product.oldPrice!),
                         style: AppTextStyles.withColor(
                           AppTextStyles.withWeight(
                             AppTextStyles.bodySmall,

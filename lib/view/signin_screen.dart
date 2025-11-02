@@ -3,6 +3,7 @@ import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:get/get.dart';
 import 'main_screen.dart';
 import 'sign_up_screen.dart';
@@ -19,6 +20,11 @@ class SigninScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isMobilePlatform =
+        defaultTargetPlatform == TargetPlatform.android ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+    final bool facebookSupported = kIsWeb ? false : isMobilePlatform;
+    final bool googleSupported = kIsWeb || isMobilePlatform;
 
     return Scaffold(
       body: SafeArea(
@@ -155,7 +161,9 @@ class SigninScreen extends StatelessWidget {
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.facebook, color: Colors.white),
                   label: Text(
-                    'Continue with Facebook',
+                    // ignore: prefer_interpolation_to_compose_strings
+                    'Continue with Facebook' +
+                        (facebookSupported ? '' : ' (Android/iOS only)'),
                     style: AppTextStyles.buttonMedium.copyWith(
                       color: Colors.white,
                     ),
@@ -168,6 +176,14 @@ class SigninScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () async {
+                    if (!facebookSupported) {
+                      Get.snackbar(
+                        'Not supported',
+                        'Facebook login isn\'t available on this platform. Please use an Android/iOS device.',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
                     final fbAuth = Get.find<AuthController>();
                     Get.dialog(
                       const Center(child: CircularProgressIndicator()),
@@ -176,11 +192,17 @@ class SigninScreen extends StatelessWidget {
                     final ok = await fbAuth.loginWithFacebook();
                     Get.back();
                     if (ok) {
-                      Get.offAll(() => const MainScreen());
+                      final auth = Get.find<AuthController>();
+                      if (auth.role.value == 'admin') {
+                        Get.offAllNamed('/admin');
+                      } else {
+                        Get.offAll(() => const MainScreen());
+                      }
                     } else {
+                      final auth = Get.find<AuthController>();
                       Get.snackbar(
                         'Login failed',
-                        'Could not sign in with Facebook',
+                        auth.lastError.value.isNotEmpty ? auth.lastError.value : 'Could not sign in with Facebook',
                         snackPosition: SnackPosition.BOTTOM,
                       );
                     }
@@ -188,6 +210,63 @@ class SigninScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
+
+              // Google login button
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: const Icon(Icons.g_mobiledata, color: Color(0xFFDB4437), size: 28),
+                  label: Text(
+                    // ignore: prefer_interpolation_to_compose_strings
+                    'Continue with Google' + (googleSupported ? '' : ' (Android/iOS/Web only)'),
+                    style: AppTextStyles.buttonMedium,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black87,
+                    side: BorderSide(color: Colors.grey.shade400),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: Theme.of(context).brightness == Brightness.dark
+                        // ignore: deprecated_member_use
+                        ? Colors.white.withOpacity(0.06)
+                        : Colors.white,
+                  ),
+                  onPressed: () async {
+                    if (!googleSupported) {
+                      Get.snackbar(
+                        'Not supported',
+                        'Google sign-in isn\'t available on this platform. Please use Android/iOS or run Web (Chrome).',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
+                    final auth = Get.find<AuthController>();
+                    Get.dialog(
+                      const Center(child: CircularProgressIndicator()),
+                      barrierDismissible: false,
+                    );
+                    final ok = await auth.loginWithGoogle();
+                    Get.back();
+                    if (ok) {
+                      final a = Get.find<AuthController>();
+                      if (a.role.value == 'admin') {
+                        Get.offAllNamed('/admin');
+                      } else {
+                        Get.offAll(() => const MainScreen());
+                      }
+                    } else {
+                      final a = Get.find<AuthController>();
+                      Get.snackbar(
+                        'Login failed',
+                        a.lastError.value.isNotEmpty ? a.lastError.value : 'Could not sign in with Google',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                    }
+                  },
+                ),
+              ),
 
               const SizedBox(height: 24),
               // signup textbutton

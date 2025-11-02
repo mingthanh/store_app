@@ -41,4 +41,45 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Social Login Token Generation
+router.post('/social-token', async (req, res) => {
+  try {
+    const { firebaseUid, email, name } = req.body;
+    if (!firebaseUid || !email) {
+      return res.status(400).json({ error: 'firebaseUid and email required' });
+    }
+
+    // Find or create user with Firebase UID
+    let user = await User.findOne({ firebaseUid });
+    if (!user) {
+      // Create new user from social login
+      user = await User.create({
+        firebaseUid,
+        name: name || '',
+        email,
+        passwordHash: '', // No password for social users
+        role: email.toLowerCase().startsWith('admin0411@') ? 0 : 1,
+      });
+    } else {
+      // Update existing user info
+      user.name = name || user.name;
+      user.email = email;
+      await user.save();
+    }
+
+    const token = signToken(user);
+    res.json({ 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role 
+      } 
+    });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
 export default router;

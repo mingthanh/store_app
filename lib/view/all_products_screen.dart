@@ -3,9 +3,17 @@ import 'package:get/get.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/filter_bottom_sheet.dart';
 import 'package:store_app/widgets/product_grid.dart';
+import 'package:store_app/widgets/category_filter_bar.dart';
 
-class AllProductsScreen extends StatelessWidget {
+class AllProductsScreen extends StatefulWidget {
   const AllProductsScreen({super.key});
+
+  @override
+  State<AllProductsScreen> createState() => _AllProductsScreenState();
+}
+
+class _AllProductsScreenState extends State<AllProductsScreen> {
+  String _selectedCategory = 'All';
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +46,39 @@ class AllProductsScreen extends StatelessWidget {
 
           // Filter icon
           IconButton(
-            onPressed: () => FilterBottomSheet.show(context),
+            onPressed: () async {
+              final Map<String, dynamic>? res = await FilterBottomSheet.show(context);
+              if (!mounted || res == null) return;
+              final String? cat = res['category'] as String?;
+              if (cat != null && cat.isNotEmpty) {
+                setState(() {
+                  _selectedCategory = cat;
+                });
+              }
+            },
             icon: const Icon(Icons.filter_list),
             color: isDark ? Colors.white : Colors.black,
           ),
         ],
       ),
-      body: const ProductGrid(useApi: true),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CategoryFilterBar(
+            categories: const ['All', 'Men', 'Women', 'Girls'],
+            selected: _selectedCategory,
+            onChanged: (val) {
+              setState(() => _selectedCategory = val);
+            },
+          ),
+          Expanded(
+            child: ProductGrid(
+              useApi: true,
+              category: _selectedCategory == 'All' ? null : _selectedCategory,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

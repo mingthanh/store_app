@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- TODO: Replace with your real Facebook App ID and Client Token -->
+    <!-- Facebook App ID must match your Meta app (see Firebase Auth provider screenshot) -->
     <string name="facebook_app_id">1881845609435665</string>
+    <!-- Facebook Client Token from Meta Developer dashboard (Settings → Advanced) -->
     <string name="facebook_client_token">f95d026048c6b12974492c04908892fc</string>
+    <!-- Used by Facebook CustomTabActivity scheme -->
+    <string name="fb_login_protocol_scheme">fb1881845609435665</string>
 </resources>

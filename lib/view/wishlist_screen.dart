@@ -4,6 +4,7 @@ import 'package:store_app/controllers/wishlist_controller.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/utils/shopping_utils.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
@@ -110,6 +111,9 @@ class WishlistScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 160),
             child: ElevatedButton(
               onPressed: () {
+                if (!ShoppingUtils.checkShoppingPermission()) {
+                  return;
+                }
                 final cart = Get.put(CartController(), permanent: true);
                 final controller = Get.find<WishlistController>();
                 for (final p in controller.wishlist) {
@@ -219,6 +223,9 @@ class WishlistScreen extends StatelessWidget {
                         children: [
                           IconButton(
                             onPressed: () {
+                              if (!ShoppingUtils.checkShoppingPermission()) {
+                                return;
+                              }
                               final cart = Get.put(CartController(), permanent: true);
                               cart.add(product, qty: 1);
                               // remove from wishlist after adding

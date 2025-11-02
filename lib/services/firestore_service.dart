@@ -1,25 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 
+/// Service quản lý tất cả các thao tác với Firestore Database
+/// Singleton pattern để đảm bảo chỉ có một instance duy nhất
 class FirestoreService {
   FirestoreService._();
   static final instance = FirestoreService._();
 
   final _db = FirebaseFirestore.instance;
 
-  // Collections
+  // Các collection trong Firestore
+  /// Collection chứa thông tin người dùng
   CollectionReference<Map<String, dynamic>> get users =>
       _db.collection('users');
+  
+  /// Collection chứa danh sách yêu thích của người dùng cụ thể
   CollectionReference<Map<String, dynamic>> userWishlist(String userId) =>
       users.doc(userId).collection('wishlist');
+  
+  /// Collection chứa giỏ hàng của người dùng cụ thể
   CollectionReference<Map<String, dynamic>> userCart(String userId) =>
       users.doc(userId).collection('cart');
+  
+  /// Collection chứa thông tin sản phẩm
   CollectionReference<Map<String, dynamic>> get products =>
       _db.collection('products');
+  
+  /// Collection chứa thông tin đơn hàng
   CollectionReference<Map<String, dynamic>> get orders =>
     _db.collection('orders');
 
-  // User
+  // Quản lý người dùng
+  /// Tạo hoặc cập nhật thông tin hồ sơ người dùng
   Future<void> upsertUserProfile({
     required String userId,
     required String name,
@@ -35,7 +47,7 @@ class FirestoreService {
       ...?extra,
     };
     await users.doc(userId).set(data, SetOptions(merge: true));
-    debugPrint('[Firestore] upsertUserProfile ok: userId=$userId');
+    debugPrint('[Firestore] Cập nhật hồ sơ người dùng thành công: userId=$userId');
   }
 
   // Orders

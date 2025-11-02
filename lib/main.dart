@@ -1,3 +1,4 @@
+// Import các controller và service cần thiết
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/controllers/theme_controller.dart';
@@ -10,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:get/get.dart';
 import 'controllers/navigation_controller.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'utils/app_secrets.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -19,50 +20,49 @@ import 'package:store_app/view/admin_dashboard_api_screen.dart';
 import 'package:store_app/view/admin_account_screen.dart';
 import 'firebase_options.dart';
 
-
+/// Hàm main - điểm khởi đầu của ứng dụng
 Future<void> main() async {
+  // Đảm bảo Flutter engine đã được khởi tạo
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Khởi tạo GetStorage để lưu trữ dữ liệu local
   await GetStorage.init();
 
-  Get.put(ThemeController());
-  Get.put(LanguageController());
-  Get.put(ApiAuthController());
-  Get.put(AuthController());
-  Get.put(NavigationController());
-  Get.put(WishlistController()); // ✅ Controller này cần sớm có mặt
+  // Khởi tạo các controller toàn cục với GetX
+  Get.put(ThemeController());     // Quản lý giao diện sáng/tối
+  Get.put(LanguageController());  // Quản lý ngôn ngữ
+  Get.put(ApiAuthController());   // Xác thực qua API
+  Get.put(AuthController());      // Xác thực Firebase
+  Get.put(NavigationController()); // Điều hướng bottom navigation
+  Get.put(WishlistController());   // Quản lý danh sách yêu thích
 
-await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-);
-  // ✅ Khởi tạo Firebase (nếu cần)
+  // Khởi tạo Firebase để kết nối với backend
   try {
-    if (!kIsWeb) {
-  await Firebase.initializeApp();
-      final box = GetStorage();
-      await box.write('firebaseReady', true);
-      await box.remove('firebaseInitError');
-  debugPrint('[Firebase] initialized successfully');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    final box = GetStorage();
+    await box.write('firebaseReady', true);
+    await box.remove('firebaseInitError');
+    debugPrint('[Firebase] initialized successfully');
 
-      // seed sample products
-      try {
-        final seeded = await FirestoreService.instance.seedSampleProductsIfEmpty();
-        if (seeded > 0) {
-          debugPrint('[Firestore] Seeded $seeded sample products');
-        }
-      } catch (e) {
-
-  debugPrint('[Firestore] Seed products error: ${e.toString()}');
+    // Tạo dữ liệu mẫu sản phẩm nếu chưa có
+    try {
+      final seeded = await FirestoreService.instance.seedSampleProductsIfEmpty();
+      if (seeded > 0) {
+        debugPrint('[Firestore] Seeded $seeded sample products');
       }
+    } catch (e) {
+      debugPrint('[Firestore] Seed products error: ${e.toString()}');
     }
   } catch (e) {
     final box = GetStorage();
     await box.write('firebaseReady', false);
     await box.write('firebaseInitError', e.toString());
-
-  debugPrint('[Firebase] initialization error: ${e.toString()}');
+    debugPrint('[Firebase] initialization error: ${e.toString()}');
   }
 
-  // ✅ Facebook SDK Web
+  // Khởi tạo Facebook SDK cho Web platform
   if (kIsWeb) {
     await FacebookAuth.i.webAndDesktopInitialize(
       appId: AppSecrets.facebookAppId,
@@ -72,30 +72,38 @@ await Firebase.initializeApp(
     );
   }
 
+  // Chạy ứng dụng chính
   runApp(const MyApp());
 }
 
+/// Widget ứng dụng chính
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Lấy các controller đã khởi tạo từ GetX
     final themeController = Get.find<ThemeController>();
     final languageController = Get.find<LanguageController>();
+    
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Store',
-      translations: AppTranslations(),
-      locale: languageController.locale,
-      fallbackLocale: const Locale('en', 'US'),
-      theme: AppThemes.light,
-      darkTheme: AppThemes.dark,
-      themeMode: themeController.theme,
-      defaultTransition: Transition.fade,
+      translations: AppTranslations(),           // Đa ngôn ngữ
+      locale: languageController.locale,         // Ngôn ngữ hiện tại
+      fallbackLocale: const Locale('en', 'US'),  // Ngôn ngữ dự phòng
+      theme: AppThemes.light,                    // Giao diện sáng
+      darkTheme: AppThemes.dark,                 // Giao diện tối
+      themeMode: themeController.theme,          // Chế độ giao diện
+      defaultTransition: Transition.fade,       // Hiệu ứng chuyển màn hình
+      
+      // Định nghĩa các route cho admin
       getPages: [
-  GetPage(name: '/admin', page: () => const AdminDashboardApiScreen()),
-  GetPage(name: '/admin-account', page: () => const AdminAccountScreen()),
+        GetPage(name: '/admin', page: () => const AdminDashboardApiScreen()),
+        GetPage(name: '/admin-account', page: () => const AdminAccountScreen()),
       ],
+      
+      // Màn hình khởi đầu
       home: SplashScreen(),
     );
   }

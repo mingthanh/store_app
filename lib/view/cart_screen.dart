@@ -5,6 +5,8 @@ import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/repositories/order_api_repository.dart';
+// VNPay flow removed; using VietQR QuickLink only
+import 'package:store_app/view/qr_payment_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -12,7 +14,10 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final cart = Get.put(CartController(), permanent: true);
+  // Lấy CartController an toàn: dùng instance đã đăng ký nếu có, nếu chưa thì khởi tạo
+  final cart = Get.isRegistered<CartController>()
+      ? Get.find<CartController>()
+      : Get.put(CartController(), permanent: true);
   final apiAuth = Get.find<ApiAuthController>();
     return Scaffold(
       appBar: AppBar(
@@ -314,28 +319,162 @@ class CartScreen extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
+                // Chặn đặt hàng khi giỏ trống
+                if (cart.totalItems == 0) {
+                  Get.snackbar(
+                    'Cart is empty',
+                    'Please add some items before checkout',
+                    snackPosition: SnackPosition.BOTTOM,
+                  );
+                  return;
+                }
                 if (!auth.isLoggedIn.value) {
                   Get.snackbar('Login required', 'Please sign in to place order', snackPosition: SnackPosition.BOTTOM);
                   return;
                 }
-                // Create a minimal order via API using local products data
+                
+                // Check if user has API token
+                final token = auth.token.value;
+                if (token == null || token.isEmpty) {
+                  if (auth.isSocialLogin.value) {
+                    Get.snackbar(
+                      'Order not available', 
+                      'Orders are currently only available for email/password accounts. Please create an account with email and password.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.orange,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 4),
+                    );
+                  } else {
+                    Get.snackbar('Authentication error', 'Please sign in again', snackPosition: SnackPosition.BOTTOM);
+                  }
+                  return;
+                }
+                
+                // Thanh toán bằng VietQR QuickLink (mặc định và duy nhất)
+                // Build order items and totals
                 final items = cart.items.values.map((e) => {
                   'name': e.product.name,
                   'price': e.product.price,
                   'quantity': e.quantity,
                 }).toList();
-                final total = cart.totalPrice;
+                final total = cart.totalPrice; // UI đang là đơn vị tiền tệ hiển thị (thường USD demo)
+                // Quy đổi sang VND: giả sử giá hiển thị là USD, tỷ giá ~24,500
+                // TODO: Nên lấy tỷ giá từ API hoặc config thay vì hardcode
+                const usdToVndRate = 24500.0;
+                final amountVnd = (total < 1000 ? (total * usdToVndRate) : total).round();
                 try {
-                  await OrderApiRepository.instance.createOrder(
-                    auth.token.value!,
-                    {
-                      'items': items,
-                      'totalAmount': total,
-                    },
-                  );
-                  cart.items.clear();
-                  cart.items.refresh();
-                  Get.snackbar('Order placed', 'Your order has been created', snackPosition: SnackPosition.BOTTOM);
+                  bool paid = false;
+                  final orderId = 'qr-${DateTime.now().millisecondsSinceEpoch}';
+                  // Mở màn QR và polling trạng thái
+                  final r = await Get.to<bool>(() => QrPaymentScreen(orderId: orderId, amountVnd: amountVnd));
+                  paid = r == true;
+                  if (paid == true) {
+                    // Hiển thị loading khi tạo đơn hàng
+                    Get.dialog(
+                      const Center(child: CircularProgressIndicator()),
+                      barrierDismissible: false,
+                    );
+                    
+                    try {
+                      // Thanh toán thành công -> tạo đơn hàng tại API
+                      await OrderApiRepository.instance.createOrder(
+                        token,
+                        {
+                          'items': items,
+                          'totalAmount': total,
+                        },
+                      );
+                      
+                      // Xóa giỏ hàng
+                      cart.clearAndPersist();
+                      
+                      // Đóng loading
+                      Get.back();
+                      
+                      // Hiển thị dialog thành công với animation
+                      await Get.dialog(
+                        AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          contentPadding: const EdgeInsets.all(24),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withAlpha((0.1 * 255).round()),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_circle_outline,
+                                  color: Colors.green,
+                                  size: 48,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Text(
+                                'Đặt hàng thành công!',
+                                style: AppTextStyles.withColor(
+                                  AppTextStyles.h3,
+                                  Theme.of(context).textTheme.bodyLarge!.color!,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Đơn hàng của bạn đã được tạo và đang được xử lý.',
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.withColor(
+                                  AppTextStyles.bodyMedium,
+                                  Colors.grey[600]!,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () => Get.back(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Xem đơn hàng của tôi',
+                                    style: AppTextStyles.withColor(
+                                      AppTextStyles.bodyMedium,
+                                      Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                      
+                      // Điều hướng đến My Orders (tab Account -> My Orders)
+                      // Quay về MainScreen và chuyển sang tab Account (index 4)
+                      Get.back(); // Đóng cart screen
+                      // MainScreen sẽ tự động hiển thị, user có thể vào Account > My Orders
+                      
+                    } catch (orderError) {
+                      Get.back(); // Đóng loading
+                      Get.snackbar(
+                        'Lỗi tạo đơn hàng',
+                        orderError.toString().replaceFirst('Exception: ', ''),
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.redAccent,
+                        colorText: Colors.white,
+                      );
+                    }
+                  } else {
+                    Get.snackbar('Thanh toán bị hủy', 'Bạn đã hủy hoặc thanh toán thất bại', snackPosition: SnackPosition.BOTTOM);
+                  }
                 } catch (e) {
                   Get.snackbar('Checkout failed', e.toString().replaceFirst('Exception: ', ''), snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.redAccent, colorText: Colors.white);
                 }

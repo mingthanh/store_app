@@ -48,6 +48,28 @@ class UserRepository {
     throw Exception('Get profile failed');
   }
 
+  /// Generate API token for social login users
+  Future<Map<String, dynamic>> createSocialToken({
+    required String firebaseUid,
+    required String email,
+    String? name,
+  }) async {
+    final uri = Uri.parse('${ApiService.instance.baseUrl}/api/auth/social-token');
+    final res = await http.post(uri,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'firebaseUid': firebaseUid,
+          'email': email,
+          'name': name,
+        }));
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      return jsonDecode(res.body) as Map<String, dynamic>;
+    }
+    throw Exception('Social token creation failed: ${res.statusCode} ${res.body}');
+  }
+
   Future<Map<String, dynamic>> updateMe(String token, {String? name, String? phone, String? avatarUrl}) async {
     final uri = Uri.parse('${ApiService.instance.baseUrl}/api/users/me');
     final body = <String, dynamic>{};

@@ -130,7 +130,12 @@ class ProfileImage extends StatelessWidget {
                     final bytes = file.bytes;
                     if (bytes != null) {
                       final auth = Get.find<ApiAuthController>();
-                      final url = await UploadRepository.instance.uploadImageBytes(auth.token.value!, bytes, file.name);
+                      final token = auth.token.value;
+                      if (token == null || token.isEmpty) {
+                        Get.snackbar('Error', 'Please sign in again', snackPosition: SnackPosition.BOTTOM);
+                        return;
+                      }
+                      final url = await UploadRepository.instance.uploadImageBytes(token, bytes, file.name);
                       final ok = await auth.updateProfile(newAvatarUrl: url);
                       if (ok) Get.snackbar('Profile', 'Avatar updated', snackPosition: SnackPosition.BOTTOM);
                     }

@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:get/get.dart';
 import 'package:store_app/models/product.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/utils/shopping_utils.dart';
 import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/view/cart_screen.dart';
 import 'package:store_app/widgets/size_selector.dart';
@@ -168,6 +169,9 @@ class ProductDetailsScreen extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
+                    if (!ShoppingUtils.checkShoppingPermission()) {
+                      return;
+                    }
                     final cart = Get.put(CartController(), permanent: true);
                     cart.add(product, qty: 1);
                     Get.snackbar('Added to cart', product.name, snackPosition: SnackPosition.BOTTOM);
@@ -203,6 +207,9 @@ class ProductDetailsScreen extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () {
+                    if (!ShoppingUtils.checkShoppingPermission()) {
+                      return;
+                    }
                     final cart = Get.put(CartController(), permanent: true);
                     cart.add(product, qty: 1);
                     Get.to(() => const CartScreen());

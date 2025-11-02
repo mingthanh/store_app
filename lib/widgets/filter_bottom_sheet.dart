@@ -3,14 +3,14 @@ import 'package:get/get.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
 class FilterBottomSheet {
-  static void show(BuildContext context) {
+  static Future<Map<String, dynamic>?> show(BuildContext context) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Local state for filters
     String selectedCategory = 'All';
     final minCtrl = TextEditingController();
     final maxCtrl = TextEditingController();
 
-    showModalBottomSheet(
+    return showModalBottomSheet<Map<String, dynamic>?>(
       context: context,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
@@ -117,7 +117,7 @@ class FilterBottomSheet {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: ['All', 'Shoes', 'Clothing', 'Bag']
+                children: const ['All', 'Men', 'Women', 'Girls']
                     .map(
                       (category) => FilterChip(
                         label: Text(category),

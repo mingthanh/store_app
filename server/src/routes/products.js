@@ -8,7 +8,13 @@ const router = Router();
 router.get('/', async (req, res) => {
   const { category, limit = 50 } = req.query;
   const q = {};
-  if (category) q.category = category;
+  if (category) {
+    // Match either single category field or array of categories
+    q.$or = [
+      { category },
+      { categories: category },
+    ];
+  }
   const items = await Product.find(q).sort({ createdAt: -1 }).limit(Number(limit));
   res.json(items);
 });

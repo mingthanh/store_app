@@ -14,11 +14,14 @@ class SplashScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Điều hướng sau 2.5 giây
     Future.delayed(const Duration(milliseconds: 2500), () {
-      if (authController.isFirstTime.value) {
-        Get.off(() => const OnboardingScreen());
-      } else if (authController.isLoggedIn.value) {
+      if (authController.isLoggedIn.value) {
+        // Nếu đã đăng nhập → vào MainScreen
         Get.off(() => const MainScreen());
+      } else if (authController.isFirstTime.value) {
+        // Nếu lần đầu tiên mở app → vào OnboardingScreen
+        Get.off(() => const OnboardingScreen());
       } else {
+        // Nếu đã từng mở app nhưng chưa đăng nhập (đã logout) → vào SigninScreen
         Get.off(() => SigninScreen());
       }
     });

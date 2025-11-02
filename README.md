@@ -44,6 +44,23 @@ flutter run --dart-define=API_BASE_URL=http://192.168.1.10:3000
 - User: Duyệt sản phẩm (API), filter theo danh mục ở Shopping, wishlist, giỏ hàng, đặt hàng, xem đơn của tôi.
 - Hồ sơ: cập nhật tên/điện thoại, đổi avatar từ gallery (upload) hoặc dán URL trực tiếp.
 
+### Thanh toán (VietQR QuickLink)
+- Ứng dụng sử dụng VietQR QuickLink (ảnh PNG lấy từ vietqr.io) để hiển thị mã QR chuyển khoản.
+- Server cung cấp các API:
+  - POST `/api/payments/qr/create` → tạo QR cho `orderId`, `amountVnd` và trả về `qrBase64` (PNG base64) + `addInfo`.
+  - GET `/api/payments/qr/status?orderId=...` → kiểm tra trạng thái thanh toán (`pending|paid|expired`).
+  - POST `/api/payments/qr/webhook` → webhook từ bên trung gian; dev có thể bật mock qua `MOCK_QR_WEBHOOK=true`.
+- Environment (server/.env):
+  - `VIETQR_BANK_BIN` – BIN ngân hàng (VD: 970418 cho VietinBank).
+  - `VIETQR_ACC_NUMBER` – Số tài khoản nhận.
+  - `VIETQR_ACC_NAME` – Tên chủ tài khoản (tùy chọn, nên đặt không dấu).
+  - `VIETQR_USE_VIETQR_IO=true` – Mặc định dùng QuickLink của vietqr.io.
+  - `VIETQR_TEMPLATE=compact2` – Template ảnh (compact2, img, ...).
+  - `QR_WEBHOOK_SECRET` – Secret để xác thực chữ ký HMAC (nếu kết nối webhook thật).
+  - `MOCK_QR_WEBHOOK=false` – Bật mock webhook khi dev.
+
+Lưu ý: VNPay đã được gỡ bỏ hoàn toàn.
+
 ## 6) Upload ảnh
 - `POST /api/uploads/images` (admin only, multipart field `image`), phản hồi `{ url: "/uploads/images/<file>" }`.
 - Client ghép `ApiService.baseUrl` khi server trả relative URL.

@@ -24,13 +24,30 @@ class _MyOrdersApiScreenState extends State<MyOrdersApiScreen> {
 
   Future<void> _load() async {
     try {
-      final t = _auth.token.value!;
+      final t = _auth.token.value;
+      
+      // Check if user is logged in via social auth but has no API token
+      if ((t == null || t.isEmpty) && _auth.isSocialLogin.value) {
+        if (!mounted) return;
+        setState(() => _loading = false);
+        // Don't show error for social login users, just empty state
+        return;
+      }
+      
+      if (t == null || t.isEmpty) {
+        Get.snackbar('Error', 'Please sign in again');
+        Get.back();
+        return;
+      }
+      
       final list = await OrderApiRepository.instance.myOrders(t);
+      if (!mounted) return;
       setState(() {
         _orders = list.cast<Map<String, dynamic>>();
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => _loading = false);
       Get.snackbar('Error', e.toString());
     }
@@ -49,14 +66,74 @@ class _MyOrdersApiScreenState extends State<MyOrdersApiScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _orders.length,
-                itemBuilder: (context, i) => _buildOrderTile(context, _orders[i]),
-              ),
+          : _orders.isEmpty
+              ? _buildEmptyState()
+              : RefreshIndicator(
+                  onRefresh: _load,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _orders.length,
+                    itemBuilder: (context, i) => _buildOrderTile(context, _orders[i]),
+                  ),
+                ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSocial = _auth.isSocialLogin.value;
+    
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isSocial ? Icons.info_outline : Icons.shopping_bag_outlined,
+              size: 64,
+              color: Colors.grey[400],
             ),
+            const SizedBox(height: 16),
+            Text(
+              isSocial 
+                ? 'Orders not available for social login'
+                : 'No orders yet',
+              style: AppTextStyles.withColor(
+                AppTextStyles.h3, 
+                isDark ? Colors.white70 : Colors.black54
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isSocial
+                ? 'Orders feature is only available for email/password accounts. Please create an account with email and password to view your orders.'
+                : 'Start shopping to see your orders here!',
+              style: AppTextStyles.withColor(
+                AppTextStyles.bodyMedium, 
+                Colors.grey[600]!
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (isSocial) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Get.back();
+                  // Navigate to email signup screen if needed
+                },
+                icon: const Icon(Icons.email),
+                label: const Text('Create Email Account'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 
