@@ -148,6 +148,8 @@ class CartController extends GetxController {
 
   /// Xóa giỏ hàng hiện tại và cập nhật lưu trữ cục bộ (dùng sau khi checkout thành công)
   void clearAndPersist() {
+    /// Xóa toàn bộ giỏ hàng hiện tại và lưu trạng thái rỗng xuống bộ nhớ cục bộ
+    /// Dùng sau khi checkout thành công để đảm bảo giỏ hàng trống
     items.clear();
     _saveCart();
     items.refresh();

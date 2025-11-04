@@ -4,6 +4,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:get/get.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
+/// Màn hình hiển thị mã QR của đơn hàng
+/// - Sinh QR từ trackingId để quét khi cập nhật vị trí
+/// - Cho phép sao chép mã tracking vào clipboard
 class OrderQrDisplayScreen extends StatelessWidget {
   final String trackingId;
   final String? orderNumber;
@@ -229,7 +232,6 @@ class OrderQrDisplayScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // TODO: Implement share functionality
                         Get.snackbar(
                           'Thông báo',
                           'Tính năng chia sẻ đang phát triển',

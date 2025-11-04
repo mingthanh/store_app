@@ -10,6 +10,7 @@ import 'package:store_app/widgets/custom_search_bar.dart';
 import 'package:store_app/widgets/product_grid.dart';
 import 'package:store_app/widgets/sale_banner.dart';
 
+/// Trang chủ: chào mừng, thông báo, search, danh mục, banner, và lưới sản phẩm phổ biến
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Bộ kiểu chữ chuẩn dùng xuyên suốt app (dựa trên Google Fonts Poppins)
 class AppTextStyles {
   // headings
   static TextStyle h1 = GoogleFonts.poppins(

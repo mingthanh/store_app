@@ -2,14 +2,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:store_app/services/firestore_service.dart';
 
+/// Dịch vụ bọc Firebase Auth cho nghiệp vụ đăng ký/đăng nhập Email/Password
+/// Đồng thời đảm bảo có hồ sơ người dùng trong Firestore (role, timestamps)
 class AuthService {
   AuthService._();
   static final instance = AuthService._();
 
   final _auth = FirebaseAuth.instance;
 
+  /// Người dùng Firebase hiện tại (nếu đã đăng nhập)
   User? get currentUser => _auth.currentUser;
 
+  /// Đăng ký tài khoản Email/Password trên Firebase
+  /// - Tạo user auth
+  /// - Cập nhật displayName để đồng bộ hồ sơ
+  /// - Tạo user profile trong Firestore (gán role admin cho trường hợp đặc biệt)
   Future<UserCredential> signUp({
     required String name,
     required String email,
@@ -42,6 +49,9 @@ class AuthService {
     return cred;
   }
 
+  /// Đăng nhập Email/Password
+  /// - Đảm bảo user doc tồn tại trong Firestore
+  /// - Với email đặc biệt, cập nhật role=admin
   Future<UserCredential> signIn({
     required String email,
     required String password,
@@ -62,6 +72,7 @@ class AuthService {
     return cred;
   }
 
+  /// Đăng xuất Firebase Auth
   Future<void> signOut() async {
     await _auth.signOut();
   }

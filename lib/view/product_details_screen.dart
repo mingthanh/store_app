@@ -8,6 +8,11 @@ import 'package:store_app/controllers/cart_controller.dart';
 import 'package:store_app/view/cart_screen.dart';
 import 'package:store_app/widgets/size_selector.dart';
 
+/// Màn hình chi tiết sản phẩm
+///
+/// - Hiển thị ảnh, tên, giá, danh mục, mô tả
+/// - Hành động: chia sẻ, thêm vào giỏ, mua ngay
+/// - Hỗ trợ định dạng giá theo USD/VND dựa trên nguồn dữ liệu
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
 
@@ -241,6 +246,7 @@ class ProductDetailsScreen extends StatelessWidget {
   }
 
   // Share product
+  /// Chia sẻ thông tin sản phẩm ra bên ngoài (Share)
   Future<void> _shareProduct(
     BuildContext context,
     String productName,
@@ -264,6 +270,7 @@ class ProductDetailsScreen extends StatelessWidget {
     }
   }
 
+  /// Xây dựng widget ảnh sản phẩm, tự nhận biết ảnh mạng/ảnh local
   Widget _buildProductImage(String url) {
     final isNetwork = url.startsWith('http');
     if (isNetwork) {
@@ -284,6 +291,10 @@ class ProductDetailsScreen extends StatelessWidget {
     );
   }
 
+  /// Định dạng giá hiển thị
+  ///
+  /// - Nếu ảnh là URL mạng (thường là dữ liệu Firestore) -> coi là VND và thêm dấu chấm ngăn cách + hậu tố "đ"
+  /// - Ngược lại -> hiển thị USD với dấu $ và 2 chữ số thập phân
   String _formatPrice(double price, String imageUrl) {
     // Heuristic: Firestore products use VND and network images
     final isVnd = imageUrl.startsWith('http');

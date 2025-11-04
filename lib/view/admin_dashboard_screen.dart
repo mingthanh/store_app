@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:store_app/services/firestore_service.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
+/// Màn hình Admin Dashboard (quản trị đơn hàng)
+///
+/// - Hiển thị tổng quan đơn hàng: số đơn, doanh thu, đang xử lý
+/// - Lọc đơn theo trạng thái (processing/shipped/delivered/cancelled)
+/// - Cho phép cập nhật trạng thái đơn hàng trực tiếp từ danh sách
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -10,6 +15,7 @@ class AdminDashboardScreen extends StatefulWidget {
 }
 
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  /// Trạng thái lọc đơn hiện tại. `null` = Hiển thị tất cả
   String? _filterStatus; // null = all
 
   @override
@@ -94,6 +100,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Hiển thị 1 ô chỉ số (metric) trên header, ví dụ: Orders/Revenue/Processing
+  ///
+  /// [title] tên chỉ số, [value] giá trị hiển thị (định dạng chuỗi)
   Widget _metric(BuildContext context, String title, Object value) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -119,6 +128,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Ô hiển thị 1 đơn hàng trong danh sách
+  ///
+  /// - Cho phép đổi trạng thái đơn bằng DropdownButton
+  /// - Gọi [FirestoreService.updateOrderStatus] để cập nhật
   Widget _orderTile(BuildContext context, Map<String, dynamic> o) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final id = o['id'] as String;

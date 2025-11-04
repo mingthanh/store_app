@@ -7,6 +7,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:store_app/repositories/tracking_repository.dart';
 import 'package:store_app/utils/app_textstyles.dart';
 
+/// Màn hình quét mã QR đơn hàng
+/// - Hỗ trợ quét trực tiếp bằng camera
+/// - Cho phép nhập mã thủ công
+/// - Định hướng tới TrackingRepository để cập nhật vị trí đơn hàng
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
 

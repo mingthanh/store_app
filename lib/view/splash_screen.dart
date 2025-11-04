@@ -5,6 +5,10 @@ import 'package:get/get.dart';
 import 'package:store_app/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 
+/// Màn hình Splash 2.5s và điều hướng thông minh
+/// - Đã đăng nhập → MainScreen
+/// - Lần đầu mở app → OnboardingScreen
+/// - Còn lại → SigninScreen
 class SplashScreen extends StatelessWidget {
   SplashScreen({super.key});
 

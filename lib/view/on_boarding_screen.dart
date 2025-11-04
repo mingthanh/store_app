@@ -4,6 +4,9 @@ import 'package:store_app/view/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// Màn hình giới thiệu (onboarding) chỉ xuất hiện lần đầu
+/// - Lướt giữa 3 slide giới thiệu
+/// - Nhấn Skip/Get Started sẽ setFirstTimeDone và chuyển tới Signin
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -33,6 +36,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
+  /// Đánh dấu đã hoàn thành onboarding và điều hướng tới Signin
   void _handleGetStarted() {
     final authController = Get.find<AuthController>();
     authController.setFirstTimeDone();

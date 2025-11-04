@@ -1,3 +1,5 @@
+/// Mô hình một bản ghi lịch sử vận chuyển (tracking history)
+/// Gắn với một đơn hàng, lưu vị trí, thời điểm và trạng thái
 class TrackingHistoryModel {
   final String id;
   final String orderId;
@@ -23,6 +25,7 @@ class TrackingHistoryModel {
     this.notes,
   });
 
+  /// Parse JSON trả về từ API → TrackingHistoryModel
   factory TrackingHistoryModel.fromJson(Map<String, dynamic> json) {
     return TrackingHistoryModel(
       id: json['_id'] ?? '',
@@ -38,6 +41,7 @@ class TrackingHistoryModel {
     );
   }
 
+  /// Chuỗi trạng thái hiển thị tiếng Việt
   String get statusText {
     switch (status) {
       case 'picked_up':
@@ -55,6 +59,7 @@ class TrackingHistoryModel {
     }
   }
 
+  /// Chuỗi trạng thái hiển thị tiếng Anh
   String get statusTextEn {
     switch (status) {
       case 'picked_up':

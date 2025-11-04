@@ -14,6 +14,11 @@ double calculateDiscount(double price, double oldPrice) {
   return discount;
 }
 
+/// Thẻ hiển thị một sản phẩm đơn lẻ trong lưới/danh sách
+///
+/// - Ảnh sản phẩm: hỗ trợ cache qua CachedNetworkImage + hiệu ứng Shimmer
+/// - Wishlist: nút trái tim dùng GetX [WishlistController]
+/// - Giá: hiển thị giá hiện tại và giá cũ (gạch ngang) nếu có, kèm badge giảm giá
 class ProductCard extends StatelessWidget {
   final Product product;
 

@@ -8,6 +8,8 @@ import 'package:store_app/view/wishlist_screen.dart';
 import '../controllers/navigation_controller.dart';
 import '../widgets/custom_bottom_navbar.dart';
 
+/// Màn hình chính với BottomNavigation (Home, Shop, Wishlist, Account)
+/// Dùng IndexedStack + NavigationController để giữ trạng thái từng tab
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 

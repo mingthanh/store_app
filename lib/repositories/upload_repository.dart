@@ -3,11 +3,15 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:store_app/services/api_service.dart';
 
+/// Repository upload ảnh lên server (Multer), trả về URL ảnh tuyệt đối
 class UploadRepository {
   UploadRepository._();
   static final instance = UploadRepository._();
 
   // Returns the absolute image URL to use in the app
+  /// Upload ảnh từ bytes với tên file [filename]
+  /// - Backend yêu cầu field 'image' (single upload)
+  /// - Trả về URL đầy đủ để hiển thị trong app
   Future<String> uploadImageBytes(String token, Uint8List bytes, String filename) async {
     // Tạo MultipartRequest POST tới /api/uploads/images
     final uri = Uri.parse('${ApiService.instance.baseUrl}/api/uploads/images');

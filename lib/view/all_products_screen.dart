@@ -5,6 +5,11 @@ import 'package:store_app/widgets/filter_bottom_sheet.dart';
 import 'package:store_app/widgets/product_grid.dart';
 import 'package:store_app/widgets/category_filter_bar.dart';
 
+/// Màn hình hiển thị tất cả sản phẩm
+///
+/// - Cho phép lọc theo danh mục (All/Men/Women/Girls)
+/// - Hỗ trợ mở bộ lọc nâng cao ở bottom sheet (FilterBottomSheet)
+/// - Danh sách sản phẩm hiển thị bằng [ProductGrid] (có thể dùng API hoặc Firestore)
 class AllProductsScreen extends StatefulWidget {
   const AllProductsScreen({super.key});
 
@@ -13,6 +18,7 @@ class AllProductsScreen extends StatefulWidget {
 }
 
 class _AllProductsScreenState extends State<AllProductsScreen> {
+  /// Danh mục đang được chọn để lọc (mặc định: 'All')
   String _selectedCategory = 'All';
 
   @override

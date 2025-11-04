@@ -7,6 +7,16 @@ import 'package:store_app/view/product_details_screen.dart';
 import 'package:store_app/widgets/product_card.dart';
 import 'package:shimmer/shimmer.dart';
 
+/// Lưới hiển thị danh sách sản phẩm theo 3 nguồn dữ liệu:
+///
+/// - [useLocal] = true: dùng danh sách mẫu trong `lib/models/product.dart`
+/// - [useApi] = true: gọi API backend (MongoDB) qua [ProductRepository]
+/// - Mặc định: dùng Firestore qua [FirestoreService]
+///
+/// Tham số:
+/// - [category]: lọc theo danh mục (null = tất cả)
+/// - [limit]: số lượng sản phẩm tối đa
+/// - [shrinkWrap], [physics]: điều khiển hành vi cuộn của GridView
 class ProductGrid extends StatelessWidget {
   final String? category;
   final int limit;

@@ -9,6 +9,9 @@ import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/widgets/empty_tracking_state.dart';
 import 'package:store_app/widgets/tracking_status_badge.dart';
 
+/// Màn hình theo dõi đơn hàng
+/// - Tải thông tin theo trackingId hoặc orderId
+/// - Hiển thị Google Map (markers + polyline) và timeline lịch sử vận chuyển
 class OrderTrackingScreen extends StatefulWidget {
   final String trackingId;
   final String? orderId; // Optional: can also load by orderId
@@ -38,6 +41,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     _loadTracking();
   }
 
+  /// Tải dữ liệu tracking từ server
+  /// - Nếu có orderId: gọi getTrackingByOrderId
+  /// - Ngược lại: gọi getTracking theo trackingId
   Future<void> _loadTracking() async {
     try {
       Map<String, dynamic> data;
@@ -69,6 +75,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     }
   }
 
+  /// Dựng dữ liệu bản đồ: marker cho từng điểm và polyline nối tuyến
   void _buildMapData() {
     if (_history.isEmpty) return;
 
@@ -109,6 +116,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     }
   }
 
+  /// Đưa camera về khung nhìn bao trọn tất cả marker
   void _fitMapBounds() {
     if (_history.isEmpty || _mapController == null) return;
 

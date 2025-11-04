@@ -45,7 +45,6 @@ class _TrackingInputScreenState extends State<TrackingInputScreen> {
 
   /// Chọn ảnh từ thư viện và quét QR code
   /// Hiện tại: Chức năng đang phát triển
-  /// TODO: Implement QR decoding từ file ảnh (cần package qr_code_tools)
   Future<void> _pickImageAndScan() async {
     setState(() => _isProcessing = true);
 

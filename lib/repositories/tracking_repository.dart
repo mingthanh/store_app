@@ -5,18 +5,24 @@ import 'package:store_app/services/api_service.dart';
 import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:get/get.dart';
 
+/// Repository gọi API Tracking từ server (scan, lấy lịch sử)
 class TrackingRepository {
   static final TrackingRepository instance = TrackingRepository._();
   TrackingRepository._();
 
   final _baseUrl = ApiService.instance.baseUrl;
 
+  /// Lấy Bearer token từ ApiAuthController (yêu cầu đã đăng nhập API)
   String? _getToken() {
     final authCtrl = Get.find<ApiAuthController>();
     return authCtrl.token.value;
   }
 
-  /// Scan QR and update location
+  /// Scan QR và cập nhật vị trí đơn hàng
+  /// [trackingId]: mã theo dõi TRK...
+  /// [locationName], [latitude], [longitude]: thông tin vị trí quét
+  /// [status]: trạng thái mới (picked_up/in_transit/...)
+  /// [notes]: ghi chú tùy chọn
   Future<Map<String, dynamic>> scanQR({
     required String trackingId,
     required String locationName,
@@ -52,7 +58,8 @@ class TrackingRepository {
     }
   }
 
-  /// Get tracking history by trackingId
+  /// Lấy thông tin tracking theo [trackingId]
+  /// Trả về order, danh sách history (map sang model), và customer
   Future<Map<String, dynamic>> getTracking(String trackingId) async {
     final token = _getToken();
     if (token == null) throw Exception('Not authenticated');
@@ -77,7 +84,8 @@ class TrackingRepository {
     }
   }
 
-  /// Get tracking by orderId
+  /// Lấy tracking theo [orderId]
+  /// Dùng khi đang ở màn hình chi tiết đơn hàng và muốn xem tracking nhanh
   Future<Map<String, dynamic>> getTrackingByOrderId(String orderId) async {
     final token = _getToken();
     if (token == null) throw Exception('Not authenticated');

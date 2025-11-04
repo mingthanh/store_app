@@ -7,6 +7,11 @@ import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/repositories/order_api_repository.dart';
 import 'package:store_app/view/qr_payment_screen.dart';
 
+/// Màn hình giỏ hàng (Cart)
+///
+/// - Hiển thị danh sách sản phẩm trong giỏ với số lượng, xóa/tăng/giảm
+/// - Tính tổng tiền theo thời gian thực bằng [CartController]
+/// - Thanh toán: mở màn hình QR và sau khi thanh toán thành công sẽ gọi API tạo đơn hàng
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -60,6 +65,9 @@ class CartScreen extends StatelessWidget {
     );
   }
 
+  /// Item hiển thị 1 sản phẩm trong giỏ
+  ///
+  /// [onInc]/[onDec]: tăng/giảm số lượng, [onRemove]: xóa sản phẩm khỏi giỏ
   Widget _buildCartItem(BuildContext context, Product product, {int quantity = 1, VoidCallback? onInc, VoidCallback? onDec, VoidCallback? onRemove}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -178,6 +186,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
+  /// Hiển thị dialog xác nhận xóa sản phẩm khỏi giỏ
   void _showDeleteConfirmationDialog(BuildContext context, Product product, VoidCallback? onConfirm) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -277,6 +286,10 @@ class CartScreen extends StatelessWidget {
     );
   }
 
+  /// Phần tổng kết và nút thanh toán (Proceed to Checkout)
+  ///
+  /// - Kiểm tra đăng nhập và token API
+  /// - Mở màn hình thanh toán QR, nếu thành công: gọi API tạo đơn, xóa giỏ và hiển thị dialog thành công
   Widget _buildCartSummary(BuildContext context, CartController cart, ApiAuthController auth) {
     return Container(
       padding: const EdgeInsets.all(24),

@@ -1,6 +1,8 @@
 import 'package:store_app/widgets/notification_type.dart';
 
+/// Repository mock dữ liệu thông báo để hiển thị trong UI
 class NotificationRepository {
+  /// Trả về danh sách thông báo mẫu (order/deliver/promo/payment)
   List<NotificationItem> getNotifications() {
     return [
       NotificationItem(

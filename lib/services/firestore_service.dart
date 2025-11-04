@@ -148,6 +148,8 @@ class FirestoreService {
   }
 
   Stream<Map<String, int>> cartStream(String userId) {
+    /// Lắng nghe giỏ hàng của một user theo thời gian thực
+    /// Trả về Map<productId, quantity> chỉ gồm những item có quantity > 0
     return userCart(userId).snapshots().map((snap) {
       final map = <String, int>{};
       for (final d in snap.docs) {
@@ -159,11 +161,14 @@ class FirestoreService {
   }
 
   // ===== Products (sample seeding for development) =====
+  /// Kiểm tra đã có ít nhất 1 sản phẩm trong collection products chưa
   Future<bool> _hasAnyProducts() async {
     final snap = await products.limit(1).get();
     return snap.docs.isNotEmpty;
   }
 
+  /// Seed dữ liệu mẫu sản phẩm khi lần đầu chạy (môi trường dev)
+  /// Trả về số lượng sản phẩm đã thêm
   Future<int> seedSampleProductsIfEmpty() async {
     if (await _hasAnyProducts()) {
       debugPrint('[Firestore] products already exist, skip seeding');
@@ -245,6 +250,8 @@ class FirestoreService {
   }
 
   // ===== Products: CRUD helpers =====
+  /// Thêm hoặc cập nhật sản phẩm theo id
+  /// - Chỉ merge field được truyền (merge: true)
   Future<void> addOrUpdateProduct({
     required String id,
     required String name,
@@ -269,11 +276,13 @@ class FirestoreService {
     debugPrint('[Firestore] addOrUpdateProduct ok: id=$id');
   }
 
+  /// Xóa sản phẩm theo id
   Future<void> deleteProduct(String id) async {
     await products.doc(id).delete();
     debugPrint('[Firestore] deleteProduct ok: id=$id');
   }
 
+  /// Stream danh sách sản phẩm (lọc theo category, giới hạn kết quả)
   Stream<List<Map<String, dynamic>>> productsStream({
     String? category,
     int limit = 50,

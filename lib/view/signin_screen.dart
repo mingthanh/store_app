@@ -9,6 +9,9 @@ import 'main_screen.dart';
 import 'sign_up_screen.dart';
 import 'forgot_password_screen.dart';
 
+/// Màn hình đăng nhập
+/// - Hỗ trợ đăng nhập API (email/password)
+/// - Google/Facebook login (nếu nền tảng hỗ trợ) qua Firebase, đồng bộ với ApiAuthController
 class SigninScreen extends StatelessWidget {
   SigninScreen({super.key});
 

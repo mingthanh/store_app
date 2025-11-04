@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Định nghĩa ThemeData sáng/tối thống nhất màu sắc và thành phần UI
 class AppThemes {
   // Light Theme
   static final light = ThemeData(

@@ -12,6 +12,9 @@ import 'package:store_app/repositories/upload_repository.dart';
 import 'package:store_app/view/qr_scanner_screen.dart';
 import 'package:store_app/view/order_tracking_screen.dart';
 
+/// Màn hình Admin Dashboard (dùng API backend)
+/// - Tabs: Products, Orders, Users, Tracking
+/// - Quản lý sản phẩm (CRUD), đơn hàng (trạng thái), người dùng, quét QR/tra cứu tracking
 class AdminDashboardApiScreen extends StatefulWidget {
   const AdminDashboardApiScreen({super.key});
 

@@ -5,6 +5,9 @@ import 'package:store_app/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+/// Màn hình đăng ký tài khoản qua API (email/password)
+/// - Validate form: name/email/password/confirm
+/// - Tạo tài khoản và điều hướng vào MainScreen khi thành công
 class SignUpScreen extends StatelessWidget {
   SignUpScreen({super.key});
 

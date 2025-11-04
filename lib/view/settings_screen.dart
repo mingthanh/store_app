@@ -7,6 +7,12 @@ import 'package:get_storage/get_storage.dart';
 import 'package:store_app/view/terms_of_service_screen.dart';
 import 'package:store_app/view/privacy_policy_screen.dart';
 
+/// Màn hình Cài đặt (Settings)
+///
+/// - Giao diện: các nhóm mục (Appearance, Notifications, Privacy, About)
+/// - Đổi theme sáng/tối qua [ThemeController]
+/// - Đổi ngôn ngữ (EN/VI) và lưu vào GetStorage
+/// - Điều hướng đến Privacy Policy / Terms of Service
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -138,6 +144,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Khối hiển thị một nhóm cài đặt với tiêu đề và danh sách item con
   Widget _buildSection(
     BuildContext context,
     String title,
@@ -163,6 +170,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Nút chuyển đổi Dark/Light mode (đồng bộ với GetX ThemeController)
   Widget _buildThemeToggle(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -207,6 +215,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Công tắc bật/tắt cài đặt đơn giản (ví dụ: push/email notifications)
   Widget _buildSwitchTile(
     BuildContext context,
     String title,
@@ -257,6 +266,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Item điều hướng đến màn hình khác (Privacy Policy, Terms of Service, v.v.)
   Widget _buildNavigationTile(
     BuildContext context,
     String title,
@@ -309,6 +319,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  /// Item chọn ngôn ngữ (EN/VI) và lưu lựa chọn vào GetStorage
   Widget _buildLanguageTile(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GetBuilder<LanguageController>(
