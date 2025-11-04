@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:store_app/controllers/api_auth_controller.dart';
 import 'package:store_app/repositories/order_api_repository.dart';
 import 'package:store_app/utils/app_textstyles.dart';
+import 'package:store_app/view/order_tracking_screen.dart';
+import 'package:store_app/view/order_qr_display_screen.dart';
+import 'package:store_app/widgets/tracking_status_badge.dart';
 
 class MyOrdersApiScreen extends StatefulWidget {
   const MyOrdersApiScreen({super.key});
@@ -141,35 +144,92 @@ class _MyOrdersApiScreenState extends State<MyOrdersApiScreen> {
     final status = (o['status'] ?? 'pending').toString();
     final total = (o['totalAmount'] is num) ? (o['totalAmount'] as num).toDouble() : double.tryParse('${o['totalAmount']}') ?? 0.0;
     final items = (o['items'] as List?) ?? const [];
+    final trackingId = o['trackingId'] as String?;
+    final orderId = o['_id'] as String?;
+    
     return Card(
-      child: ListTile(
-        title: Text('Order ${o['_id'] ?? ''}'),
-        subtitle: Text('${items.length} items • ${_formatVnd(total)}'),
-        trailing: _statusChip(context, status),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          ListTile(
+            title: Text('Order ${orderId ?? ''}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 4),
+                Text('${items.length} items • ${_formatVnd(total)}'),
+                if (trackingId != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.qr_code_2, size: 14, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          trackingId,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontFamily: 'monospace',
+                            color: Colors.grey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+            trailing: _statusChip(context, status),
+          ),
+          // Action buttons
+          if (trackingId != null && orderId != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Get.to(() => OrderTrackingScreen(
+                          trackingId: trackingId,
+                          orderId: orderId,
+                        ));
+                      },
+                      icon: const Icon(Icons.location_on, size: 18),
+                      label: const Text('Theo dõi'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Get.to(() => OrderQrDisplayScreen(
+                          trackingId: trackingId,
+                          orderNumber: orderId,
+                        ));
+                      },
+                      icon: const Icon(Icons.qr_code, size: 18),
+                      label: const Text('Xem QR'),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
 
   Widget _statusChip(BuildContext context, String status) {
-    Color c;
-    switch (status) {
-      case 'processing':
-        c = Colors.blue; break;
-      case 'shipped':
-        c = Colors.orange; break;
-      case 'delivered':
-        c = Colors.green; break;
-      case 'cancelled':
-        c = Colors.red; break;
-      default:
-        c = Colors.grey;
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      // ignore: deprecated_member_use
-      decoration: BoxDecoration(color: c.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-      child: Text(status, style: TextStyle(color: c)),
-    );
+    return TrackingStatusBadge(status: status);
   }
 
   String _formatVnd(double price) {

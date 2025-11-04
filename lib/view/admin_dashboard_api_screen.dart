@@ -9,6 +9,8 @@ import 'package:store_app/view/admin_account_screen.dart';
 import 'package:store_app/view/signin_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:store_app/repositories/upload_repository.dart';
+import 'package:store_app/view/qr_scanner_screen.dart';
+import 'package:store_app/view/order_tracking_screen.dart';
 
 class AdminDashboardApiScreen extends StatefulWidget {
   const AdminDashboardApiScreen({super.key});
@@ -30,7 +32,7 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this); // Changed from 3 to 4
     // Ensure FAB visibility updates when switching tabs
     _tabController.addListener(() {
       if (mounted) setState(() {});
@@ -83,6 +85,7 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
             Tab(text: 'Products'),
             Tab(text: 'Orders'),
             Tab(text: 'Users'),
+            Tab(text: 'Tracking'), // NEW TAB
           ],
         ),
       ),
@@ -98,6 +101,7 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
                 _productsTab(),
                 _ordersTab(),
                 _usersTab(),
+                _trackingTab(), // NEW TAB CONTENT
               ],
             ),
     );
@@ -150,13 +154,61 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             ...orders.map((o) => Card(
-                  child: ListTile(
-                    title: Text('Order ${o['_id']}'),
-                    subtitle: Text('Total: ${o['totalAmount']} đ'),
-                    trailing: _StatusDropdown(
-                      value: o['status']?.toString() ?? 'pending',
-                      onChanged: (val) => _changeOrderStatus(o, val),
-                    ),
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text('Order ${o['_id']}'),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Total: ${o['totalAmount']} đ'),
+                            if (o['trackingId'] != null)
+                              Text(
+                                'Tracking: ${o['trackingId']}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'monospace',
+                                  color: Colors.blue,
+                                ),
+                              ),
+                          ],
+                        ),
+                        trailing: _StatusDropdown(
+                          value: o['status']?.toString() ?? 'pending',
+                          onChanged: (val) => _changeOrderStatus(o, val),
+                        ),
+                      ),
+                      // ACTION BUTTONS ROW
+                      if (o['trackingId'] != null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _scanQRForOrder(o),
+                                  icon: const Icon(Icons.qr_code_scanner, size: 18),
+                                  label: const Text('Scan QR'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _viewTracking(o['trackingId']),
+                                  icon: const Icon(Icons.location_on, size: 18),
+                                  label: const Text('View Tracking'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: Colors.green,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
                 )),
           ],
@@ -463,6 +515,185 @@ class _AdminDashboardApiScreenState extends State<AdminDashboardApiScreen>
         Get.snackbar('Error', e.toString());
       }
     }
+  }
+
+  // ==================== TRACKING FEATURES ====================
+  // Các tính năng quản lý tracking đơn hàng cho admin
+
+  /// Tab Tracking - Hiển thị tất cả đơn hàng có tracking ID
+  /// Cho phép admin:
+  /// - Xem danh sách đơn hàng đang được tracking
+  /// - Quét QR code nhanh
+  /// - Xem vị trí hiện tại của đơn hàng
+  /// - Click vào đơn hàng để xem trên bản đồ
+  Widget _trackingTab() => RefreshIndicator(
+        onRefresh: _loadOrders,
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Order Tracking',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _openQRScanner(),
+                  icon: const Icon(Icons.qr_code_scanner),
+                  label: const Text('Scan QR'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            // Filter only orders with trackingId
+            ...orders
+                .where((o) => o['trackingId'] != null)
+                .map((o) => Card(
+                      child: ListTile(
+                        leading: const Icon(Icons.local_shipping,
+                            color: Colors.blue),
+                        title: Text(
+                          o['trackingId']?.toString() ?? '',
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Order: ${o['_id']}'),
+                            Text('Total: ${o['totalAmount']} đ'),
+                            Text('Status: ${o['status']}'),
+                            if (o['currentLocation'] != null &&
+                                o['currentLocation']['name'] != null)
+                              Text(
+                                '📍 ${o['currentLocation']['name']}',
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.map),
+                          color: Colors.green,
+                          onPressed: () => _viewTracking(o['trackingId']),
+                          tooltip: 'View on Map',
+                        ),
+                        onTap: () => _viewTracking(o['trackingId']),
+                      ),
+                    )),
+            if (orders.where((o) => o['trackingId'] != null).isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      Icon(Icons.location_off,
+                          size: 64, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(
+                        'No tracked orders yet',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
+
+  /// Mở màn hình quét QR code
+  /// Sau khi quét xong và cập nhật thành công, reload danh sách đơn hàng
+  void _openQRScanner() async {
+    final result = await Get.to(() => const QrScannerScreen());
+    if (result == true) {
+      _loadOrders(); // Refresh danh sách sau khi quét
+    }
+  }
+
+  /// Quét QR code cho đơn hàng cụ thể
+  /// Hiển thị dialog xác nhận trước khi mở camera
+  /// Sau khi quét xong, cập nhật danh sách đơn hàng
+  void _scanQRForOrder(Map<String, dynamic> order) async {
+    final trackingId = order['trackingId']?.toString();
+    if (trackingId == null) {
+      Get.snackbar('Error', 'This order has no tracking ID');
+      return;
+    }
+
+    // Hiển thị thông tin đơn hàng sẽ được quét
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Scan QR Code'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('You will scan QR code for:'),
+            const SizedBox(height: 8),
+            Text(
+              'Order: ${order['_id']}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('Tracking ID: $trackingId'),
+            Text('Total: ${order['totalAmount']} đ'),
+            const SizedBox(height: 16),
+            const Text(
+              'Make sure you scan the correct QR code!',
+              style: TextStyle(
+                color: Colors.orange,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Open Scanner'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final result = await Get.to(() => const QrScannerScreen());
+      if (result == true) {
+        _loadOrders(); // Refresh after scanning
+        Get.snackbar(
+          'Success',
+          'Location updated for order ${order['_id']}',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      }
+    }
+  }
+
+  /// Xem tracking trên bản đồ
+  /// Mở màn hình OrderTrackingScreen với tracking ID
+  /// Hiển thị lịch sử vận chuyển và vị trí trên Google Maps
+  void _viewTracking(String? trackingId) {
+    if (trackingId == null || trackingId.isEmpty) {
+      Get.snackbar('Error', 'Invalid tracking ID');
+      return;
+    }
+
+    Get.to(() => OrderTrackingScreen(trackingId: trackingId));
   }
 }
 

@@ -8,6 +8,8 @@ import 'package:store_app/utils/app_textstyles.dart';
 import 'package:store_app/view/settings_screen.dart';
 import 'package:store_app/view/signin_screen.dart';
 import 'package:store_app/view/help_center_screen.dart';
+import 'package:store_app/view/qr_scanner_screen.dart';
+import 'package:store_app/view/tracking_input_screen.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -115,9 +117,16 @@ class AccountScreen extends StatelessWidget {
 
   Widget _buildMenuSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final apiAuth = Get.find<ApiAuthController>();
+    
+    // Kiểm tra xem user có phải staff/admin không (role 0 = admin/staff)
+    final isStaff = apiAuth.roleNum.value == 0;
+    
     final menuItems = [
       {'icon': Icons.shopping_bag_outlined, 'key': 'my_orders'},
       {'icon': Icons.location_on_outlined, 'key': 'shipping_address'},
+      {'icon': Icons.search, 'key': 'tracking_lookup'},
+      if (isStaff) {'icon': Icons.qr_code_scanner, 'key': 'qr_scanner'},
       {'icon': Icons.help_outline, 'key': 'help_center'},
       {'icon': Icons.logout_outlined, 'key': 'logout'},
     ];
@@ -165,6 +174,10 @@ class AccountScreen extends StatelessWidget {
                   Get.to(() => const MyOrdersApiScreen());
                 } else if (key == 'shipping_address') {
                   Get.to(() => ShippingAddressScreen());
+                } else if (key == 'tracking_lookup') {
+                  Get.to(() => const TrackingInputScreen());
+                } else if (key == 'qr_scanner') {
+                  Get.to(() => const QrScannerScreen());
                 } else if (key == 'help_center') {
                   Get.to(() => const HelpCenterScreen());
                 }

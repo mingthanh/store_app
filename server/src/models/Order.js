@@ -21,8 +21,33 @@ const OrderSchema = new mongoose.Schema(
       default: 'pending',
       enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     },
+    // Tracking fields
+    trackingId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow null for old orders
+      index: true
+    },
+    currentLocation: {
+      name: String,
+      latitude: Number,
+      longitude: Number,
+      updatedAt: Date
+    },
+    trackingHistory: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TrackingHistory'
+    }]
   },
   { timestamps: true }
 );
+
+// Auto-generate trackingId on create
+OrderSchema.pre('save', function(next) {
+  if (this.isNew && !this.trackingId) {
+    this.trackingId = `TRK${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+  }
+  next();
+});
 
 export default mongoose.model('Order', OrderSchema);

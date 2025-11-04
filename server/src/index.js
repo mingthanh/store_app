@@ -12,6 +12,7 @@ import usersRouter from './routes/users.js';
 import uploadsRouter from './routes/uploads.js';
 // Removed VNPay routes; using VietQR QuickLink instead
 import paymentsQrRouter from './routes/payments_qr.js';
+import trackingRouter from './routes/tracking.js';
 
 dotenv.config(); // Đọc biến môi trường từ .env nếu có
 
@@ -50,6 +51,7 @@ async function start() {
   app.use('/api/users', usersRouter);
   app.use('/api/uploads', uploadsRouter);
   app.use('/api/payments/qr', paymentsQrRouter);
+  app.use('/api/tracking', trackingRouter);
 
   app.listen(PORT, () => console.log(`[Server] running on http://localhost:${PORT}`));
 

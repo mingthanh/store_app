@@ -108,6 +108,16 @@ class AppTranslations extends Translations {
           'order_label': 'Order',
           'view_details': 'View Details',
           'items_total': '@items items. Total: @total',
+          // Tracking
+          'qr_scanner': 'QR Scanner',
+          'tracking_lookup': 'Tracking Lookup',
+          'tracking_test': 'Tracking Test',
+          'track_order': 'Track Order',
+          'view_qr': 'View QR',
+          'scan_order_qr': 'Scan Order QR',
+          'tracking_history': 'Tracking History',
+          'current_location': 'Current Location',
+          'no_tracking_info': 'No tracking information available',
           // Product details
           'details_title': 'Details',
           'select_size': 'Select Size',
@@ -226,6 +236,16 @@ class AppTranslations extends Translations {
           'order_label': 'Đơn',
           'view_details': 'Xem chi tiết',
           'items_total': '@items món • Tổng: @total',
+          // Tracking
+          'qr_scanner': 'Quét mã QR',
+          'tracking_lookup': 'Tra cứu vận đơn',
+          'tracking_test': 'Kiểm Tra Tracking',
+          'track_order': 'Theo dõi',
+          'view_qr': 'Xem QR',
+          'scan_order_qr': 'Quét mã đơn hàng',
+          'tracking_history': 'Lịch sử vận chuyển',
+          'current_location': 'Vị trí hiện tại',
+          'no_tracking_info': 'Chưa có thông tin vận chuyển',
           // Product details
           'details_title': 'Chi tiết',
           'select_size': 'Chọn kích cỡ',
